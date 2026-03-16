@@ -781,4 +781,34 @@ export const useIDEStore = create<IDEState>()(persist((set, get) => ({
   unstageFile: (file) => set((s) => ({
     gitChanges: s.gitChanges.map((c) => c.file === file ? { ...c, staged: false } : c),
   })),
+}), {
+  name: 'lumina-ide-storage',
+  storage: createJSONStorage(() => localStorage),
+  partialize: (state) => ({
+    files: state.files,
+    expandedFolders: Array.from(state.expandedFolders),
+    tabs: state.tabs,
+    activeTabId: state.activeTabId,
+    rightTabs: state.rightTabs,
+    activeRightTabId: state.activeRightTabId,
+    splitEditorOpen: state.splitEditorOpen,
+    extensions: state.extensions,
+    chatMessages: state.chatMessages,
+    gitChanges: state.gitChanges,
+    gitBranch: state.gitBranch,
+    terminalHistory: state.terminalHistory,
+    sidebarOpen: state.sidebarOpen,
+    bottomPanelOpen: state.bottomPanelOpen,
+    aiPanelOpen: state.aiPanelOpen,
+  }),
+  merge: (persisted: any, current) => {
+    if (!persisted) return current;
+    return {
+      ...current,
+      ...persisted,
+      expandedFolders: new Set(persisted.expandedFolders || ['root', 'src', 'pages', 'components']),
+      registeredCommands: current.registeredCommands,
+      chatMessages: (persisted.chatMessages || []).map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) })),
+    };
+  },
 }));
