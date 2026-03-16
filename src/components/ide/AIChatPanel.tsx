@@ -153,7 +153,7 @@ const AIChatPanel: React.FC = () => {
             >
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[10px] text-text-tertiary font-medium uppercase tracking-wider">
-                  {msg.role === 'user' ? 'You' : 'Lumina AI'}
+                  {msg.role === 'user' ? 'You' : 'KAUD AI'}
                 </span>
                 <button
                   onClick={() => copyToClipboard(msg.content, msg.id)}
