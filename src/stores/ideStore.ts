@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { FileNode, EditorTab, SidebarView, BottomPanelView, Extension, ChatMessage, GitChange, Problem, ExtensionCommand } from '@/types/ide';
+import { syncFileWrite, syncFolderCreate, syncDelete } from '@/lib/workspaceSync';
 
 // Start with empty file tree — each user builds their own
 const sampleFiles: FileNode[] = [];
