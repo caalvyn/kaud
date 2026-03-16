@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import type { FileNode, EditorTab, SidebarView, BottomPanelView, Extension, ChatMessage, GitChange, Problem, ExtensionCommand } from '@/types/ide';
 
 // Start with empty file tree — each user builds their own
@@ -238,9 +237,15 @@ interface IDEState {
   addTerminalLine: (line: string) => void;
   stageFile: (file: string) => void;
   unstageFile: (file: string) => void;
+
+  // Actions - Import/Export
+  importFiles: (files: FileNode[]) => void;
+  clearWorkspace: () => void;
+  hasUnsavedChanges: () => boolean;
+  markAllSaved: () => void;
 }
 
-export const useIDEStore = create<IDEState>()(persist((set, get) => ({
+export const useIDEStore = create<IDEState>()((set, get) => ({
   sidebarView: 'explorer',
   sidebarOpen: true,
   bottomPanelOpen: true,
@@ -515,34 +520,15 @@ export const useIDEStore = create<IDEState>()(persist((set, get) => ({
   unstageFile: (file) => set((s) => ({
     gitChanges: s.gitChanges.map((c) => c.file === file ? { ...c, staged: false } : c),
   })),
-}), {
-  name: 'kaud-ide-storage',
-  storage: createJSONStorage(() => localStorage),
-  partialize: (state) => ({
-    files: state.files,
-    expandedFolders: Array.from(state.expandedFolders),
-    tabs: state.tabs,
-    activeTabId: state.activeTabId,
-    rightTabs: state.rightTabs,
-    activeRightTabId: state.activeRightTabId,
-    splitEditorOpen: state.splitEditorOpen,
-    extensions: state.extensions,
-    chatMessages: state.chatMessages,
-    gitChanges: state.gitChanges,
-    gitBranch: state.gitBranch,
-    terminalHistory: state.terminalHistory,
-    sidebarOpen: state.sidebarOpen,
-    bottomPanelOpen: state.bottomPanelOpen,
-    aiPanelOpen: state.aiPanelOpen,
-  }),
-  merge: (persisted: any, current) => {
-    if (!persisted) return current;
-    return {
-      ...current,
-      ...persisted,
-      expandedFolders: new Set(persisted.expandedFolders || []),
-      registeredCommands: current.registeredCommands,
-      chatMessages: (persisted.chatMessages || []).map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) })),
-    };
+
+  importFiles: (files) => set({ files, tabs: [], activeTabId: null, rightTabs: [], activeRightTabId: null, expandedFolders: new Set() }),
+  clearWorkspace: () => set({ files: [], tabs: [], activeTabId: null, rightTabs: [], activeRightTabId: null, expandedFolders: new Set(), selectedFileId: null }),
+  hasUnsavedChanges: () => {
+    const s = get();
+    return s.tabs.some(t => t.isModified) || s.rightTabs.some(t => t.isModified);
   },
+  markAllSaved: () => set((s) => ({
+    tabs: s.tabs.map(t => ({ ...t, isModified: false })),
+    rightTabs: s.rightTabs.map(t => ({ ...t, isModified: false })),
+  })),
 }));

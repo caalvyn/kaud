@@ -2,8 +2,9 @@ import React, { useMemo } from 'react';
 import Editor from '@monaco-editor/react';
 import { useIDEStore } from '@/stores/ideStore';
 import type { FileNode } from '@/types/ide';
-import { FolderOpen, Sparkles, SplitSquareHorizontal } from 'lucide-react';
+import { SplitSquareHorizontal } from 'lucide-react';
 import EditorTabs from './EditorTabs';
+import WelcomeScreen from './WelcomeScreen';
 
 const findFile = (nodes: FileNode[], id: string): FileNode | null => {
   for (const n of nodes) {
@@ -79,33 +80,7 @@ const MonacoEditor: React.FC = () => {
   const activeRightTab = rightTabs.find((t) => t.id === activeRightTabId);
 
   if (!activeTab) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full gap-6" style={{ background: 'hsl(var(--editor-bg))' }}>
-        <div className="w-16 h-16 rounded-2xl flex items-center justify-center glass-surface">
-          <Sparkles size={28} className="text-text-tertiary" />
-        </div>
-        <div className="text-center">
-          <h2 className="text-lg font-semibold text-foreground mb-1">KAUD</h2>
-          <p className="text-xs text-text-tertiary mb-6">Modern AI-Powered Code Editor</p>
-        </div>
-        <div className="flex flex-col items-center gap-2 text-xs">
-          <div className="flex items-center gap-2 text-text-tertiary">
-            <FolderOpen size={14} />
-            <span>Open a file from the explorer to start editing</span>
-          </div>
-          <div className="flex items-center gap-4 mt-3">
-            <span className="text-text-tertiary">
-              <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono" style={{ background: 'hsl(var(--surface-2))', border: '1px solid hsl(var(--glass-border) / 0.3)' }}>⌘P</kbd>
-              {' '}Command Palette
-            </span>
-            <span className="text-text-tertiary">
-              <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono" style={{ background: 'hsl(var(--surface-2))', border: '1px solid hsl(var(--glass-border) / 0.3)' }}>⌘I</kbd>
-              {' '}AI Chat
-            </span>
-          </div>
-        </div>
-      </div>
-    );
+    return <WelcomeScreen />;
   }
 
   return (
