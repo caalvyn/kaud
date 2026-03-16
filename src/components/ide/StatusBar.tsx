@@ -1,9 +1,10 @@
 import React from 'react';
 import { useIDEStore } from '@/stores/ideStore';
 import { GitBranch, AlertTriangle, AlertCircle, Info, Bell, Wifi } from 'lucide-react';
+import SaveExportBar from './SaveExportBar';
 
 const StatusBar: React.FC = () => {
-  const { gitBranch, problems, tabs, activeTabId } = useIDEStore();
+  const { gitBranch, problems, tabs, activeTabId, files } = useIDEStore();
   const activeTab = tabs.find((t) => t.id === activeTabId);
   const errors = problems.filter((p) => p.severity === 'error').length;
   const warnings = problems.filter((p) => p.severity === 'warning').length;
@@ -21,6 +22,7 @@ const StatusBar: React.FC = () => {
         </span>
       </div>
       <div className="flex items-center gap-3">
+        {files.length > 0 && <SaveExportBar />}
         {activeTab && (
           <>
             <span>Ln 1, Col 1</span>
