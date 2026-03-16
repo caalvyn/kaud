@@ -2,255 +2,8 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { FileNode, EditorTab, SidebarView, BottomPanelView, Extension, ChatMessage, GitChange, Problem, ExtensionCommand } from '@/types/ide';
 
-// Sample project files
-const sampleFiles: FileNode[] = [
-  {
-    id: 'root',
-    name: 'lumina-project',
-    type: 'folder',
-    path: '/lumina-project',
-    children: [
-      {
-        id: 'src',
-        name: 'src',
-        type: 'folder',
-        path: '/lumina-project/src',
-        children: [
-          {
-            id: 'app-tsx',
-            name: 'App.tsx',
-            type: 'file',
-            path: '/lumina-project/src/App.tsx',
-            language: 'typescript',
-            content: `import React from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import Dashboard from './pages/Dashboard';
-
-const App: React.FC = () => {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-      </Routes>
-    </BrowserRouter>
-  );
-};
-
-export default App;`,
-          },
-          {
-            id: 'main-tsx',
-            name: 'main.tsx',
-            type: 'file',
-            path: '/lumina-project/src/main.tsx',
-            language: 'typescript',
-            content: `import { createRoot } from 'react-dom/client';
-import App from './App';
-import './index.css';
-
-createRoot(document.getElementById('root')!).render(<App />);`,
-          },
-          {
-            id: 'index-css',
-            name: 'index.css',
-            type: 'file',
-            path: '/lumina-project/src/index.css',
-            language: 'css',
-            content: `@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root {
-  --primary: #3b82f6;
-  --background: #0a0a0f;
-  --foreground: #e2e8f0;
-}
-
-body {
-  margin: 0;
-  font-family: 'Inter', sans-serif;
-  background: var(--background);
-  color: var(--foreground);
-}`,
-          },
-          {
-            id: 'pages',
-            name: 'pages',
-            type: 'folder',
-            path: '/lumina-project/src/pages',
-            children: [
-              {
-                id: 'homepage',
-                name: 'HomePage.tsx',
-                type: 'file',
-                path: '/lumina-project/src/pages/HomePage.tsx',
-                language: 'typescript',
-                content: `import React from 'react';
-
-interface HeroProps {
-  title: string;
-  subtitle: string;
-}
-
-const Hero: React.FC<HeroProps> = ({ title, subtitle }) => (
-  <section className="hero">
-    <h1>{title}</h1>
-    <p>{subtitle}</p>
-    <button className="cta-button">Get Started</button>
-  </section>
-);
-
-const HomePage: React.FC = () => {
-  return (
-    <main>
-      <Hero 
-        title="Welcome to Lumina" 
-        subtitle="The next-generation code editor"
-      />
-    </main>
-  );
-};
-
-export default HomePage;`,
-              },
-              {
-                id: 'dashboard',
-                name: 'Dashboard.tsx',
-                type: 'file',
-                path: '/lumina-project/src/pages/Dashboard.tsx',
-                language: 'typescript',
-                content: `import React, { useState, useEffect } from 'react';
-
-interface Metric {
-  label: string;
-  value: number;
-  trend: 'up' | 'down' | 'stable';
-}
-
-const Dashboard: React.FC = () => {
-  const [metrics, setMetrics] = useState<Metric[]>([]);
-
-  useEffect(() => {
-    setMetrics([
-      { label: 'Active Users', value: 1247, trend: 'up' },
-      { label: 'Revenue', value: 52400, trend: 'up' },
-      { label: 'Churn Rate', value: 2.3, trend: 'down' },
-    ]);
-  }, []);
-
-  return (
-    <div className="dashboard">
-      <h1>Dashboard</h1>
-      <div className="metrics-grid">
-        {metrics.map((metric) => (
-          <div key={metric.label} className="metric-card">
-            <span className="label">{metric.label}</span>
-            <span className="value">{metric.value}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-export default Dashboard;`,
-              },
-            ],
-          },
-          {
-            id: 'components',
-            name: 'components',
-            type: 'folder',
-            path: '/lumina-project/src/components',
-            children: [
-              {
-                id: 'button-tsx',
-                name: 'Button.tsx',
-                type: 'file',
-                path: '/lumina-project/src/components/Button.tsx',
-                language: 'typescript',
-                content: `import React from 'react';
-
-interface ButtonProps {
-  variant?: 'primary' | 'secondary' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
-  children: React.ReactNode;
-  onClick?: () => void;
-}
-
-const Button: React.FC<ButtonProps> = ({
-  variant = 'primary',
-  size = 'md',
-  children,
-  onClick,
-}) => {
-  return (
-    <button
-      className={\`btn btn-\${variant} btn-\${size}\`}
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  );
-};
-
-export default Button;`,
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: 'package-json',
-        name: 'package.json',
-        type: 'file',
-        path: '/lumina-project/package.json',
-        language: 'json',
-        content: `{
-  "name": "lumina-project",
-  "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.30.0"
-  }
-}`,
-      },
-      {
-        id: 'readme',
-        name: 'README.md',
-        type: 'file',
-        path: '/lumina-project/README.md',
-        language: 'markdown',
-        content: `# Lumina Project\n\nA modern web application built with React and TypeScript.\n\n## Getting Started\n\n\`\`\`bash\nnpm install\nnpm run dev\n\`\`\``,
-      },
-      {
-        id: 'tsconfig',
-        name: 'tsconfig.json',
-        type: 'file',
-        path: '/lumina-project/tsconfig.json',
-        language: 'json',
-        content: `{
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "ESNext",
-    "jsx": "react-jsx",
-    "strict": true
-  },
-  "include": ["src"]
-}`,
-      },
-    ],
-  },
-];
+// Start with empty file tree — each user builds their own
+const sampleFiles: FileNode[] = [];
 
 const sampleExtensions: Extension[] = [
   {
@@ -379,18 +132,6 @@ const sampleExtensions: Extension[] = [
   },
 ];
 
-const sampleGitChanges: GitChange[] = [
-  { file: 'src/App.tsx', status: 'modified', staged: false },
-  { file: 'src/pages/Dashboard.tsx', status: 'modified', staged: true },
-  { file: 'src/components/Modal.tsx', status: 'added', staged: false },
-  { file: 'src/utils/deprecated.ts', status: 'deleted', staged: false },
-];
-
-const sampleProblems: Problem[] = [
-  { file: 'src/App.tsx', line: 12, col: 5, severity: 'warning', message: "'Dashboard' is defined but never used", source: 'typescript' },
-  { file: 'src/pages/HomePage.tsx', line: 8, col: 3, severity: 'info', message: "Consider extracting Hero into a separate file", source: 'eslint' },
-  { file: 'src/components/Button.tsx', line: 15, col: 22, severity: 'warning', message: "Template literal can be simplified", source: 'eslint' },
-];
 
 const getLanguageFromName = (name: string): string => {
   const ext = name.split('.').pop()?.toLowerCase();
@@ -512,16 +253,14 @@ export const useIDEStore = create<IDEState>()(persist((set, get) => ({
   splitEditorOpen: false,
   
   files: sampleFiles,
-  expandedFolders: new Set(['root', 'src', 'pages', 'components']),
-  selectedFileId: 'app-tsx',
+  expandedFolders: new Set<string>(),
+  selectedFileId: null,
   
   contextMenu: null,
   renamingNodeId: null,
   
-  tabs: [
-    { id: 'tab-app', fileId: 'app-tsx', name: 'App.tsx', path: '/src/App.tsx', language: 'typescript', isModified: false },
-  ],
-  activeTabId: 'tab-app',
+  tabs: [],
+  activeTabId: null,
   rightTabs: [],
   activeRightTabId: null,
   
@@ -532,22 +271,13 @@ export const useIDEStore = create<IDEState>()(persist((set, get) => ({
   
   chatMessages: [],
   chatLoading: false,
-  gitChanges: sampleGitChanges,
+  gitChanges: [],
   gitBranch: 'main',
-  problems: sampleProblems,
+  problems: [],
   searchQuery: '',
   searchResults: [],
   terminalHistory: [
-    '$ cd lumina-project',
-    '$ npm install',
-    'added 347 packages in 4.2s',
-    '$ npm run dev',
-    '',
-    '  VITE v5.4.19  ready in 312 ms',
-    '',
-    '  ➜  Local:   http://localhost:5173/',
-    '  ➜  Network: http://192.168.1.42:5173/',
-    '  ➜  press h + enter to show help',
+    '$ Welcome to Lumina IDE',
     '',
   ],
   
@@ -655,12 +385,14 @@ export const useIDEStore = create<IDEState>()(persist((set, get) => ({
   createFile: (parentId, name) => set((s) => {
     const id = `file-${Date.now()}`;
     const lang = getLanguageFromName(name);
+    if (parentId === 'root') {
+      const newFile: FileNode = { id, name, type: 'file', path: `/${name}`, language: lang, content: '' };
+      return { files: [...s.files, newFile] };
+    }
     const addToParent = (nodes: FileNode[]): FileNode[] =>
       nodes.map((n) => {
         if (n.id === parentId && n.type === 'folder') {
-          const newFile: FileNode = {
-            id, name, type: 'file', path: `${n.path}/${name}`, language: lang, content: '',
-          };
+          const newFile: FileNode = { id, name, type: 'file', path: `${n.path}/${name}`, language: lang, content: '' };
           return { ...n, children: [...(n.children || []), newFile] };
         }
         if (n.children) return { ...n, children: addToParent(n.children) };
@@ -673,12 +405,14 @@ export const useIDEStore = create<IDEState>()(persist((set, get) => ({
   
   createFolder: (parentId, name) => set((s) => {
     const id = `folder-${Date.now()}`;
+    if (parentId === 'root') {
+      const newFolder: FileNode = { id, name, type: 'folder', path: `/${name}`, children: [] };
+      return { files: [...s.files, newFolder] };
+    }
     const addToParent = (nodes: FileNode[]): FileNode[] =>
       nodes.map((n) => {
         if (n.id === parentId && n.type === 'folder') {
-          const newFolder: FileNode = {
-            id, name, type: 'folder', path: `${n.path}/${name}`, children: [],
-          };
+          const newFolder: FileNode = { id, name, type: 'folder', path: `${n.path}/${name}`, children: [] };
           return { ...n, children: [...(n.children || []), newFolder] };
         }
         if (n.children) return { ...n, children: addToParent(n.children) };
@@ -782,7 +516,7 @@ export const useIDEStore = create<IDEState>()(persist((set, get) => ({
     gitChanges: s.gitChanges.map((c) => c.file === file ? { ...c, staged: false } : c),
   })),
 }), {
-  name: 'lumina-ide-storage',
+  name: 'lumina-ide-storage-v2',
   storage: createJSONStorage(() => localStorage),
   partialize: (state) => ({
     files: state.files,
@@ -806,7 +540,7 @@ export const useIDEStore = create<IDEState>()(persist((set, get) => ({
     return {
       ...current,
       ...persisted,
-      expandedFolders: new Set(persisted.expandedFolders || ['root', 'src', 'pages', 'components']),
+      expandedFolders: new Set(persisted.expandedFolders || []),
       registeredCommands: current.registeredCommands,
       chatMessages: (persisted.chatMessages || []).map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) })),
     };
