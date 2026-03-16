@@ -2,10 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   ChevronRight, ChevronDown, FileText, FileCode, FileJson, FileType,
   Image, File, Folder, FolderOpen, FilePlus, FolderPlus, Trash2, Pencil,
-  SplitSquareHorizontal,
+  SplitSquareHorizontal, Link, Unlink, FolderSync,
 } from 'lucide-react';
 import { useIDEStore } from '@/stores/ideStore';
 import type { FileNode } from '@/types/ide';
+import { linkFolder, unlinkFolder, isLinked, getLinkedName, onLinkChange, syncAllFiles } from '@/lib/workspaceSync';
 
 const getFileIcon = (name: string) => {
   const ext = name.split('.').pop()?.toLowerCase();
