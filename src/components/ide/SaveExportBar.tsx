@@ -16,13 +16,30 @@ const collectFiles = (nodes: FileNode[], prefix = ''): { path: string; content: 
   return result;
 };
 
+const getMimeType = (filename: string): string => {
+  const ext = filename.split('.').pop()?.toLowerCase();
+  const mimeMap: Record<string, string> = {
+    js: 'application/javascript', ts: 'application/typescript',
+    jsx: 'text/jsx', tsx: 'text/tsx',
+    json: 'application/json', html: 'text/html', htm: 'text/html',
+    css: 'text/css', scss: 'text/x-scss', less: 'text/x-less',
+    xml: 'application/xml', svg: 'image/svg+xml',
+    md: 'text/markdown', txt: 'text/plain',
+    py: 'text/x-python', rb: 'text/x-ruby',
+    sh: 'application/x-sh', yaml: 'text/yaml', yml: 'text/yaml',
+  };
+  return mimeMap[ext || ''] || 'text/plain';
+};
+
 const downloadFile = (filename: string, content: string) => {
-  const blob = new Blob([content], { type: 'text/plain' });
+  const blob = new Blob([content], { type: getMimeType(filename) });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
 };
 
