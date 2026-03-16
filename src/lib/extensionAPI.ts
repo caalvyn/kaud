@@ -28,7 +28,7 @@ class CommandRegistry {
   execute(id: string) {
     const cmd = this.commands.get(id);
     if (cmd) cmd.handler();
-    else console.warn(`[Lumina] Command not found: ${id}`);
+    else console.warn(`[KAUD] Command not found: ${id}`);
   }
 
   getAll(): { id: string; title: string }[] {
