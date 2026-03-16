@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { FileNode, EditorTab, SidebarView, BottomPanelView, Extension, ChatMessage, GitChange, Problem, ExtensionCommand } from '@/types/ide';
+import { syncFileWrite, syncFolderCreate, syncDelete } from '@/lib/workspaceSync';
 
 // Start with empty file tree — each user builds their own
 const sampleFiles: FileNode[] = [];
@@ -376,74 +377,106 @@ export const useIDEStore = create<IDEState>()((set, get) => ({
     set({ activeRightTabId: tabId });
   },
   
-  updateFileContent: (fileId, content) => set((s) => {
-    const updateNode = (nodes: FileNode[]): FileNode[] =>
-      nodes.map((n) => {
-        if (n.id === fileId) return { ...n, content };
-        if (n.children) return { ...n, children: updateNode(n.children) };
-        return n;
-      });
-    const tabs = s.tabs.map((t) => t.fileId === fileId ? { ...t, isModified: true } : t);
-    const rightTabs = s.rightTabs.map((t) => t.fileId === fileId ? { ...t, isModified: true } : t);
-    return { files: updateNode(s.files), tabs, rightTabs };
-  }),
+  updateFileContent: (fileId, content) => {
+    set((s) => {
+      const updateNode = (nodes: FileNode[]): FileNode[] =>
+        nodes.map((n) => {
+          if (n.id === fileId) return { ...n, content };
+          if (n.children) return { ...n, children: updateNode(n.children) };
+          return n;
+        });
+      const tabs = s.tabs.map((t) => t.fileId === fileId ? { ...t, isModified: true } : t);
+      const rightTabs = s.rightTabs.map((t) => t.fileId === fileId ? { ...t, isModified: true } : t);
+      return { files: updateNode(s.files), tabs, rightTabs };
+    });
+    // Sync to linked folder
+    const findNode = (nodes: FileNode[]): FileNode | null => {
+      for (const n of nodes) {
+        if (n.id === fileId) return n;
+        if (n.children) { const f = findNode(n.children); if (f) return f; }
+      }
+      return null;
+    };
+    const node = findNode(get().files);
+    if (node) syncFileWrite(node.path, content);
+  },
   
-  createFile: (parentId, name) => set((s) => {
-    const id = `file-${Date.now()}`;
-    const lang = getLanguageFromName(name);
-    if (parentId === 'root') {
-      const newFile: FileNode = { id, name, type: 'file', path: `/${name}`, language: lang, content: '' };
-      return { files: [...s.files, newFile] };
-    }
-    const addToParent = (nodes: FileNode[]): FileNode[] =>
-      nodes.map((n) => {
-        if (n.id === parentId && n.type === 'folder') {
-          const newFile: FileNode = { id, name, type: 'file', path: `${n.path}/${name}`, language: lang, content: '' };
-          return { ...n, children: [...(n.children || []), newFile] };
-        }
-        if (n.children) return { ...n, children: addToParent(n.children) };
-        return n;
-      });
-    const expanded = new Set(s.expandedFolders);
-    expanded.add(parentId);
-    return { files: addToParent(s.files), expandedFolders: expanded };
-  }),
+  createFile: (parentId, name) => {
+    set((s) => {
+      const id = `file-${Date.now()}`;
+      const lang = getLanguageFromName(name);
+      if (parentId === 'root') {
+        const newFile: FileNode = { id, name, type: 'file', path: `/${name}`, language: lang, content: '' };
+        syncFileWrite(newFile.path, '');
+        return { files: [...s.files, newFile] };
+      }
+      const addToParent = (nodes: FileNode[]): FileNode[] =>
+        nodes.map((n) => {
+          if (n.id === parentId && n.type === 'folder') {
+            const newFile: FileNode = { id, name, type: 'file', path: `${n.path}/${name}`, language: lang, content: '' };
+            syncFileWrite(newFile.path, '');
+            return { ...n, children: [...(n.children || []), newFile] };
+          }
+          if (n.children) return { ...n, children: addToParent(n.children) };
+          return n;
+        });
+      const expanded = new Set(s.expandedFolders);
+      expanded.add(parentId);
+      return { files: addToParent(s.files), expandedFolders: expanded };
+    });
+  },
   
-  createFolder: (parentId, name) => set((s) => {
-    const id = `folder-${Date.now()}`;
-    if (parentId === 'root') {
-      const newFolder: FileNode = { id, name, type: 'folder', path: `/${name}`, children: [] };
-      return { files: [...s.files, newFolder] };
-    }
-    const addToParent = (nodes: FileNode[]): FileNode[] =>
-      nodes.map((n) => {
-        if (n.id === parentId && n.type === 'folder') {
-          const newFolder: FileNode = { id, name, type: 'folder', path: `${n.path}/${name}`, children: [] };
-          return { ...n, children: [...(n.children || []), newFolder] };
-        }
-        if (n.children) return { ...n, children: addToParent(n.children) };
-        return n;
-      });
-    const expanded = new Set(s.expandedFolders);
-    expanded.add(parentId);
-    return { files: addToParent(s.files), expandedFolders: expanded };
-  }),
+  createFolder: (parentId, name) => {
+    set((s) => {
+      const id = `folder-${Date.now()}`;
+      if (parentId === 'root') {
+        const newFolder: FileNode = { id, name, type: 'folder', path: `/${name}`, children: [] };
+        syncFolderCreate(newFolder.path);
+        return { files: [...s.files, newFolder] };
+      }
+      const addToParent = (nodes: FileNode[]): FileNode[] =>
+        nodes.map((n) => {
+          if (n.id === parentId && n.type === 'folder') {
+            const newFolder: FileNode = { id, name, type: 'folder', path: `${n.path}/${name}`, children: [] };
+            syncFolderCreate(newFolder.path);
+            return { ...n, children: [...(n.children || []), newFolder] };
+          }
+          if (n.children) return { ...n, children: addToParent(n.children) };
+          return n;
+        });
+      const expanded = new Set(s.expandedFolders);
+      expanded.add(parentId);
+      return { files: addToParent(s.files), expandedFolders: expanded };
+    });
+  },
   
-  deleteNode: (nodeId) => set((s) => {
-    const removeNode = (nodes: FileNode[]): FileNode[] =>
-      nodes.filter((n) => n.id !== nodeId).map((n) => {
-        if (n.children) return { ...n, children: removeNode(n.children) };
-        return n;
-      });
-    // Close any tabs for the deleted file
-    const tabs = s.tabs.filter((t) => t.fileId !== nodeId);
-    const rightTabs = s.rightTabs.filter((t) => t.fileId !== nodeId);
-    let activeTabId = s.activeTabId;
-    if (s.tabs.find((t) => t.id === activeTabId)?.fileId === nodeId) {
-      activeTabId = tabs.length > 0 ? tabs[tabs.length - 1].id : null;
-    }
-    return { files: removeNode(s.files), tabs, rightTabs, activeTabId };
-  }),
+  deleteNode: (nodeId) => {
+    // Find node before deleting to sync
+    const findNode = (nodes: FileNode[]): FileNode | null => {
+      for (const n of nodes) {
+        if (n.id === nodeId) return n;
+        if (n.children) { const f = findNode(n.children); if (f) return f; }
+      }
+      return null;
+    };
+    const node = findNode(get().files);
+    if (node) syncDelete(node.path, node.type === 'folder');
+
+    set((s) => {
+      const removeNode = (nodes: FileNode[]): FileNode[] =>
+        nodes.filter((n) => n.id !== nodeId).map((n) => {
+          if (n.children) return { ...n, children: removeNode(n.children) };
+          return n;
+        });
+      const tabs = s.tabs.filter((t) => t.fileId !== nodeId);
+      const rightTabs = s.rightTabs.filter((t) => t.fileId !== nodeId);
+      let activeTabId = s.activeTabId;
+      if (s.tabs.find((t) => t.id === activeTabId)?.fileId === nodeId) {
+        activeTabId = tabs.length > 0 ? tabs[tabs.length - 1].id : null;
+      }
+      return { files: removeNode(s.files), tabs, rightTabs, activeTabId };
+    });
+  },
   
   renameNode: (nodeId, newName) => set((s) => {
     const rename = (nodes: FileNode[]): FileNode[] =>
