@@ -70,35 +70,22 @@ const SaveExportBar: React.FC = () => {
 
   const handleExportAll = async () => {
     const allFiles = collectFiles(files);
+    if (allFiles.length === 0) return;
 
-    // Try File System Access API to save into a real folder
-    if ('showDirectoryPicker' in window) {
-      try {
-        const dirHandle = await (window as any).showDirectoryPicker({ mode: 'readwrite' });
-        for (const file of allFiles) {
-          const parts = file.path.split('/');
-          let currentDir = dirHandle;
-          // Create subdirectories as needed
-          for (let i = 0; i < parts.length - 1; i++) {
-            currentDir = await currentDir.getDirectoryHandle(parts[i], { create: true });
-          }
-          const fileHandle = await currentDir.getFileHandle(parts[parts.length - 1], { create: true });
-          const writable = await fileHandle.createWritable();
-          await writable.write(file.content);
-          await writable.close();
-        }
-        markAllSaved();
-        setShowSaved(true);
-        return;
-      } catch (err: any) {
-        if (err.name === 'AbortError') return; // User cancelled
-        // Fall through to JSON download
-      }
+    // Create a zip with proper folder structure
+    const zip = new JSZip();
+    for (const file of allFiles) {
+      zip.file(file.path, file.content);
     }
-
-    // Fallback: download as single JSON bundle
-    const exportData = JSON.stringify(allFiles, null, 2);
-    downloadFile('kaud-workspace.json', exportData);
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'workspace.zip';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
     markAllSaved();
     setShowSaved(true);
   };
