@@ -8,7 +8,6 @@ import SourceControl from '@/components/ide/SourceControl';
 import ExtensionManager from '@/components/ide/ExtensionManager';
 import AIChatPanel from '@/components/ide/AIChatPanel';
 import SettingsPanel from '@/components/ide/SettingsPanel';
-import EditorTabs from '@/components/ide/EditorTabs';
 import MonacoEditor from '@/components/ide/MonacoEditor';
 import BottomPanel from '@/components/ide/BottomPanel';
 import StatusBar from '@/components/ide/StatusBar';
@@ -32,7 +31,6 @@ const IDELayout: React.FC = () => {
 
   const SidebarContent = sidebarComponents[sidebarView] || FileExplorer;
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const mod = e.metaKey || e.ctrlKey;
@@ -49,10 +47,8 @@ const IDELayout: React.FC = () => {
       <TitleBar />
       
       <div className="flex flex-1 overflow-hidden">
-        {/* Activity Bar */}
         <ActivityBar />
         
-        {/* Sidebar */}
         <AnimatePresence initial={false}>
           {sidebarOpen && (
             <motion.div
@@ -70,19 +66,12 @@ const IDELayout: React.FC = () => {
           )}
         </AnimatePresence>
         
-        {/* Main Content */}
         <div className="flex flex-1 overflow-hidden">
-          {/* Editor + Bottom Panel */}
           <div className="flex flex-col flex-1 overflow-hidden">
-            {/* Editor Tabs + Editor */}
-            <div className="flex flex-col flex-1 overflow-hidden">
-              <EditorTabs />
-              <div className="flex-1 overflow-hidden">
-                <MonacoEditor />
-              </div>
+            <div className="flex-1 overflow-hidden">
+              <MonacoEditor />
             </div>
             
-            {/* Bottom Panel */}
             <AnimatePresence initial={false}>
               {bottomPanelOpen && (
                 <motion.div
@@ -100,7 +89,6 @@ const IDELayout: React.FC = () => {
             </AnimatePresence>
           </div>
           
-          {/* AI Panel (right) */}
           <AnimatePresence initial={false}>
             {aiPanelOpen && (
               <motion.div

@@ -1,17 +1,71 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, Code2, Eraser, Loader2 } from 'lucide-react';
+import { Send, Sparkles, Code2, Eraser, Loader2, Wand2, Copy, Check } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { useIDEStore } from '@/stores/ideStore';
 import type { ChatMessage } from '@/types/ide';
 
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lumina-chat`;
+
 const AIChatPanel: React.FC = () => {
-  const { chatMessages, addChatMessage, chatLoading, setChatLoading } = useIDEStore();
+  const { chatMessages, addChatMessage, chatLoading, setChatLoading, updateLastAssistantMessage } = useIDEStore();
   const [input, setInput] = useState('');
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
+
+  const streamChat = async (messages: { role: string; content: string }[]) => {
+    const resp = await fetch(CHAT_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ messages }),
+    });
+
+    if (!resp.ok || !resp.body) {
+      if (resp.status === 429) throw new Error('Rate limit exceeded. Please wait a moment and try again.');
+      if (resp.status === 402) throw new Error('AI credits exhausted. Add credits in your workspace settings.');
+      throw new Error('Failed to connect to AI');
+    }
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let textBuffer = '';
+    let fullContent = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      textBuffer += decoder.decode(value, { stream: true });
+
+      let newlineIndex: number;
+      while ((newlineIndex = textBuffer.indexOf('\n')) !== -1) {
+        let line = textBuffer.slice(0, newlineIndex);
+        textBuffer = textBuffer.slice(newlineIndex + 1);
+        if (line.endsWith('\r')) line = line.slice(0, -1);
+        if (line.startsWith(':') || line.trim() === '') continue;
+        if (!line.startsWith('data: ')) continue;
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === '[DONE]') break;
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+          if (content) {
+            fullContent += content;
+            updateLastAssistantMessage(fullContent);
+          }
+        } catch {
+          textBuffer = line + '\n' + textBuffer;
+          break;
+        }
+      }
+    }
+  };
 
   const handleSend = async () => {
     const text = input.trim();
@@ -27,20 +81,15 @@ const AIChatPanel: React.FC = () => {
     setInput('');
     setChatLoading(true);
 
-    // Simulated AI response (replace with Lovable Cloud edge function)
-    setTimeout(() => {
-      const responses: Record<string, string> = {
-        default: `I've analyzed your request. Here's what I suggest:\n\n\`\`\`typescript\n// Generated code based on your prompt\nconst result = processData(input);\nconsole.log(result);\n\`\`\`\n\nWould you like me to apply this to your current file?`,
-      };
-      const assistantMsg: ChatMessage = {
-        id: `msg-${Date.now() + 1}`,
-        role: 'assistant',
-        content: responses.default,
-        timestamp: new Date(),
-      };
-      addChatMessage(assistantMsg);
+    try {
+      const apiMessages = [...chatMessages, userMsg].map((m) => ({ role: m.role, content: m.content }));
+      await streamChat(apiMessages);
+    } catch (e) {
+      const errMsg = e instanceof Error ? e.message : 'An error occurred';
+      updateLastAssistantMessage(`⚠️ ${errMsg}`);
+    } finally {
       setChatLoading(false);
-    }, 1200);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -50,10 +99,17 @@ const AIChatPanel: React.FC = () => {
     }
   };
 
+  const copyToClipboard = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
   const quickActions = [
     { icon: Code2, label: 'Explain code', prompt: 'Explain the selected code in detail' },
-    { icon: Sparkles, label: 'Refactor', prompt: 'Refactor this code for better readability' },
-    { icon: Eraser, label: 'Fix errors', prompt: 'Fix any errors in the current file' },
+    { icon: Sparkles, label: 'Refactor', prompt: 'Refactor this code for better readability and performance' },
+    { icon: Eraser, label: 'Fix errors', prompt: 'Find and fix any bugs or errors in the current code' },
+    { icon: Wand2, label: 'Generate', prompt: 'Generate a new React component with TypeScript for ' },
   ];
 
   return (
@@ -61,6 +117,7 @@ const AIChatPanel: React.FC = () => {
       <div className="px-4 py-2.5 flex items-center gap-2 border-b border-border">
         <Sparkles size={14} className="text-accent-blue" />
         <span className="text-xs font-semibold text-foreground">Lumina AI</span>
+        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-accent-blue/20 text-accent-blue ml-auto">Streaming</span>
       </div>
 
       <div className="flex-1 overflow-y-auto p-3 space-y-3">
@@ -71,7 +128,7 @@ const AIChatPanel: React.FC = () => {
             </div>
             <div className="text-center">
               <p className="text-sm font-medium text-foreground">Lumina AI Assistant</p>
-              <p className="text-[11px] text-text-tertiary mt-1">Ask me to explain, refactor, or generate code</p>
+              <p className="text-[11px] text-text-tertiary mt-1">Powered by Gemini · Ask me anything about code</p>
             </div>
             <div className="flex flex-wrap gap-1.5 justify-center">
               {quickActions.map((a) => (
@@ -90,18 +147,33 @@ const AIChatPanel: React.FC = () => {
           chatMessages.map((msg) => (
             <div
               key={msg.id}
-              className={`rounded-lg px-3 py-2.5 text-xs leading-relaxed ${
+              className={`rounded-lg px-3 py-2.5 text-xs leading-relaxed relative group ${
                 msg.role === 'user' ? 'chat-message-user' : 'chat-message-assistant'
               }`}
             >
-              <div className="text-[10px] text-text-tertiary mb-1 font-medium uppercase tracking-wider">
-                {msg.role === 'user' ? 'You' : 'Lumina AI'}
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] text-text-tertiary font-medium uppercase tracking-wider">
+                  {msg.role === 'user' ? 'You' : 'Lumina AI'}
+                </span>
+                <button
+                  onClick={() => copyToClipboard(msg.content, msg.id)}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity text-text-tertiary hover:text-foreground"
+                  title="Copy"
+                >
+                  {copiedId === msg.id ? <Check size={11} /> : <Copy size={11} />}
+                </button>
               </div>
-              <div className="text-text-secondary whitespace-pre-wrap font-sans">{msg.content}</div>
+              {msg.role === 'assistant' ? (
+                <div className="prose prose-invert prose-xs max-w-none text-text-secondary [&_pre]:bg-surface-0 [&_pre]:rounded-md [&_pre]:p-2 [&_pre]:text-[11px] [&_code]:text-accent-blue [&_code]:text-[11px] [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0">
+                  <ReactMarkdown>{msg.content}</ReactMarkdown>
+                </div>
+              ) : (
+                <div className="text-text-secondary whitespace-pre-wrap font-sans">{msg.content}</div>
+              )}
             </div>
           ))
         )}
-        {chatLoading && (
+        {chatLoading && chatMessages[chatMessages.length - 1]?.role !== 'assistant' && (
           <div className="chat-message-assistant rounded-lg px-3 py-2.5 flex items-center gap-2">
             <Loader2 size={13} className="animate-spin text-accent-blue" />
             <span className="text-xs text-text-tertiary">Thinking...</span>

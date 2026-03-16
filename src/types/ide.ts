@@ -15,6 +15,7 @@ export interface EditorTab {
   path: string;
   language: string;
   isModified: boolean;
+  splitGroup?: 'left' | 'right';
 }
 
 export type SidebarView = 'explorer' | 'search' | 'git' | 'extensions' | 'ai' | 'settings';
@@ -32,6 +33,34 @@ export interface Extension {
   category: string;
   downloads: number;
   rating: number;
+  // Extension API fields
+  activationEvents?: string[];
+  contributes?: ExtensionContributions;
+}
+
+export interface ExtensionContributions {
+  commands?: ExtensionCommand[];
+  languages?: ExtensionLanguage[];
+  themes?: ExtensionTheme[];
+  iconThemes?: string[];
+}
+
+export interface ExtensionCommand {
+  id: string;
+  title: string;
+  keybinding?: string;
+}
+
+export interface ExtensionLanguage {
+  id: string;
+  extensions: string[];
+  aliases: string[];
+}
+
+export interface ExtensionTheme {
+  id: string;
+  label: string;
+  uiTheme: 'vs-dark' | 'vs' | 'hc-black';
 }
 
 export interface ChatMessage {
@@ -55,3 +84,42 @@ export interface Problem {
   message: string;
   source: string;
 }
+
+// Extension API types
+export interface ExtensionAPI {
+  registerCommand: (id: string, handler: () => void) => void;
+  registerLanguage: (language: ExtensionLanguage) => void;
+  registerTheme: (theme: ExtensionTheme) => void;
+  getActiveFile: () => FileNode | null;
+  openFile: (path: string) => void;
+  showNotification: (message: string, type?: 'info' | 'warning' | 'error') => void;
+}
+
+export interface ExtensionManifest {
+  id: string;
+  name: string;
+  version: string;
+  publisher: string;
+  description: string;
+  activationEvents: string[];
+  contributes: ExtensionContributions;
+  main?: string;
+}
+
+// Marketplace types
+export interface MarketplaceExtension {
+  id: string;
+  name: string;
+  publisher: string;
+  description: string;
+  version: string;
+  category: string;
+  downloads: number;
+  rating: number;
+  icon?: string;
+  verified: boolean;
+  lastUpdated: string;
+  tags: string[];
+}
+
+export type MarketplaceCategory = 'All' | 'Language' | 'Themes' | 'Formatters' | 'Linters' | 'AI' | 'DevOps' | 'Visual' | 'Source Control';
