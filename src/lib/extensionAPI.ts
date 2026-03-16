@@ -1,7 +1,7 @@
 /**
- * Lumina Extension API
+ * KAUD Extension API
  * 
- * This module provides the extension system architecture for Lumina.
+ * This module provides the extension system architecture for KAUD.
  * Extensions can register commands, languages, themes, and more.
  * 
  * Architecture:
