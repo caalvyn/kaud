@@ -132,18 +132,6 @@ const sampleExtensions: Extension[] = [
   },
 ];
 
-const sampleGitChanges: GitChange[] = [
-  { file: 'src/App.tsx', status: 'modified', staged: false },
-  { file: 'src/pages/Dashboard.tsx', status: 'modified', staged: true },
-  { file: 'src/components/Modal.tsx', status: 'added', staged: false },
-  { file: 'src/utils/deprecated.ts', status: 'deleted', staged: false },
-];
-
-const sampleProblems: Problem[] = [
-  { file: 'src/App.tsx', line: 12, col: 5, severity: 'warning', message: "'Dashboard' is defined but never used", source: 'typescript' },
-  { file: 'src/pages/HomePage.tsx', line: 8, col: 3, severity: 'info', message: "Consider extracting Hero into a separate file", source: 'eslint' },
-  { file: 'src/components/Button.tsx', line: 15, col: 22, severity: 'warning', message: "Template literal can be simplified", source: 'eslint' },
-];
 
 const getLanguageFromName = (name: string): string => {
   const ext = name.split('.').pop()?.toLowerCase();
