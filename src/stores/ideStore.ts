@@ -277,7 +277,7 @@ export const useIDEStore = create<IDEState>()(persist((set, get) => ({
   searchQuery: '',
   searchResults: [],
   terminalHistory: [
-    '$ Welcome to Lumina IDE',
+    '$ Welcome to KAUD IDE',
     '',
   ],
   
