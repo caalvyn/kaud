@@ -2,8 +2,9 @@ import React, { useMemo } from 'react';
 import Editor from '@monaco-editor/react';
 import { useIDEStore } from '@/stores/ideStore';
 import type { FileNode } from '@/types/ide';
-import { FolderOpen, Sparkles, SplitSquareHorizontal } from 'lucide-react';
+import { SplitSquareHorizontal } from 'lucide-react';
 import EditorTabs from './EditorTabs';
+import WelcomeScreen from './WelcomeScreen';
 
 const findFile = (nodes: FileNode[], id: string): FileNode | null => {
   for (const n of nodes) {
