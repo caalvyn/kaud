@@ -143,7 +143,7 @@ export class ExtensionHost {
    */
   deactivate(extensionId: string) {
     this.activeExtensions.delete(extensionId);
-    console.log(`[Lumina] Extension deactivated: ${extensionId}`);
+    console.log(`[KAUD] Extension deactivated: ${extensionId}`);
   }
 
   /**
