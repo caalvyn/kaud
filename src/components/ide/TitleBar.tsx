@@ -19,9 +19,9 @@ const TitleBar: React.FC = () => {
 
       <div className="flex items-center gap-2 text-xs text-text-secondary">
         <Sparkles size={12} className="text-accent-blue" />
-        <span className="font-medium tracking-wide">Lumina</span>
+        <span className="font-medium tracking-wide">KAUD</span>
         <span className="text-text-tertiary">—</span>
-        <span className="text-text-tertiary">lumina-project</span>
+        <span className="text-text-tertiary">workspace</span>
       </div>
 
       <div className="flex items-center">

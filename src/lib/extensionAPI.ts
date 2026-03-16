@@ -1,7 +1,7 @@
 /**
- * Lumina Extension API
+ * KAUD Extension API
  * 
- * This module provides the extension system architecture for Lumina.
+ * This module provides the extension system architecture for KAUD.
  * Extensions can register commands, languages, themes, and more.
  * 
  * Architecture:
@@ -28,7 +28,7 @@ class CommandRegistry {
   execute(id: string) {
     const cmd = this.commands.get(id);
     if (cmd) cmd.handler();
-    else console.warn(`[Lumina] Command not found: ${id}`);
+    else console.warn(`[KAUD] Command not found: ${id}`);
   }
 
   getAll(): { id: string; title: string }[] {
@@ -98,11 +98,11 @@ export class ExtensionHost {
       },
       getActiveFile: () => null, // To be connected to editor state
       openFile: (_path) => {
-        console.log(`[Lumina Extension API] openFile called with: ${_path}`);
+        console.log(`[KAUD Extension API] openFile called with: ${_path}`);
       },
       showNotification: (message, type = 'info') => {
         this.notifications.push({ message, type });
-        console.log(`[Lumina Notification] [${type}] ${message}`);
+        console.log(`[KAUD Notification] [${type}] ${message}`);
       },
     };
   }
@@ -117,7 +117,7 @@ export class ExtensionHost {
     if (manifest.contributes.commands) {
       for (const cmd of manifest.contributes.commands) {
         this.commands.register(cmd.id, cmd.title, () => {
-          console.log(`[Lumina] Executing command: ${cmd.title}`);
+          console.log(`[KAUD] Executing command: ${cmd.title}`);
         });
       }
     }
@@ -135,7 +135,7 @@ export class ExtensionHost {
     }
 
     this.activeExtensions.add(manifest.id);
-    console.log(`[Lumina] Extension activated: ${manifest.name}`);
+    console.log(`[KAUD] Extension activated: ${manifest.name}`);
   }
 
   /**
@@ -143,7 +143,7 @@ export class ExtensionHost {
    */
   deactivate(extensionId: string) {
     this.activeExtensions.delete(extensionId);
-    console.log(`[Lumina] Extension deactivated: ${extensionId}`);
+    console.log(`[KAUD] Extension deactivated: ${extensionId}`);
   }
 
   /**

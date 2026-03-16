@@ -116,7 +116,7 @@ const AIChatPanel: React.FC = () => {
     <div className="flex flex-col h-full" style={{ background: 'hsl(var(--panel-bg))' }}>
       <div className="px-4 py-2.5 flex items-center gap-2 border-b border-border">
         <Sparkles size={14} className="text-accent-blue" />
-        <span className="text-xs font-semibold text-foreground">Lumina AI</span>
+        <span className="text-xs font-semibold text-foreground">KAUD AI</span>
         <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-accent-blue/20 text-accent-blue ml-auto">Streaming</span>
       </div>
 
@@ -127,7 +127,7 @@ const AIChatPanel: React.FC = () => {
               <Sparkles size={20} className="text-accent-blue" />
             </div>
             <div className="text-center">
-              <p className="text-sm font-medium text-foreground">Lumina AI Assistant</p>
+               <p className="text-sm font-medium text-foreground">KAUD AI Assistant</p>
               <p className="text-[11px] text-text-tertiary mt-1">Powered by Gemini · Ask me anything about code</p>
             </div>
             <div className="flex flex-wrap gap-1.5 justify-center">
@@ -153,7 +153,7 @@ const AIChatPanel: React.FC = () => {
             >
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[10px] text-text-tertiary font-medium uppercase tracking-wider">
-                  {msg.role === 'user' ? 'You' : 'Lumina AI'}
+                  {msg.role === 'user' ? 'You' : 'KAUD AI'}
                 </span>
                 <button
                   onClick={() => copyToClipboard(msg.content, msg.id)}
@@ -189,7 +189,7 @@ const AIChatPanel: React.FC = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask Lumina AI..."
+            placeholder="Ask KAUD AI..."
             rows={1}
             className="flex-1 bg-transparent border-none outline-none text-xs text-foreground placeholder:text-text-tertiary resize-none font-sans leading-5"
             style={{ minHeight: 20, maxHeight: 100 }}
