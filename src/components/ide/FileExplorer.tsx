@@ -235,9 +235,41 @@ const FileExplorer: React.FC = () => {
         </div>
       )}
       <div className="flex-1 overflow-y-auto overflow-x-hidden py-1">
-        {files.map((node) => (
-          <TreeItem key={node.id} node={node} depth={0} />
-        ))}
+        {files.length === 0 && !creating ? (
+          <div className="flex flex-col items-center justify-center h-full px-6 text-center gap-4">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'hsl(var(--surface-2))' }}>
+              <FolderOpen size={24} className="text-text-tertiary" />
+            </div>
+            <div>
+              <p className="text-xs text-text-secondary font-medium mb-1">No files yet</p>
+              <p className="text-[11px] text-text-tertiary leading-relaxed">
+                Create new files and folders to start building your project.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 w-full">
+              <button
+                onClick={() => setCreating('file')}
+                className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
+                style={{ background: 'hsl(var(--accent-blue))', color: 'hsl(var(--surface-0))' }}
+              >
+                <FilePlus size={13} />
+                New File
+              </button>
+              <button
+                onClick={() => setCreating('folder')}
+                className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium text-text-secondary hover:text-foreground transition-colors"
+                style={{ background: 'hsl(var(--surface-2))', border: '1px solid hsl(var(--glass-border) / 0.3)' }}
+              >
+                <FolderPlus size={13} />
+                New Folder
+              </button>
+            </div>
+          </div>
+        ) : (
+          files.map((node) => (
+            <TreeItem key={node.id} node={node} depth={0} />
+          ))
+        )}
       </div>
       <ContextMenu />
     </div>
