@@ -536,7 +536,7 @@ export const useIDEStore = create<IDEState>()(persist((set, get) => ({
     return {
       ...current,
       ...persisted,
-      expandedFolders: new Set(persisted.expandedFolders || ['root', 'src', 'pages', 'components']),
+      expandedFolders: new Set(persisted.expandedFolders || []),
       registeredCommands: current.registeredCommands,
       chatMessages: (persisted.chatMessages || []).map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) })),
     };
