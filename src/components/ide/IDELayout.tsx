@@ -48,7 +48,7 @@ const IDELayout: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden" style={{ background: 'hsl(var(--surface-0))' }}>
-      <TitleBar />
+      {/* TitleBar removed */}
       
       <div className="flex flex-1 overflow-hidden">
         <ActivityBar />
