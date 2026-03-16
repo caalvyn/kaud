@@ -265,16 +265,14 @@ export const useIDEStore = create<IDEState>()(persist((set, get) => ({
   splitEditorOpen: false,
   
   files: sampleFiles,
-  expandedFolders: new Set(['root', 'src', 'pages', 'components']),
-  selectedFileId: 'app-tsx',
+  expandedFolders: new Set<string>(),
+  selectedFileId: null,
   
   contextMenu: null,
   renamingNodeId: null,
   
-  tabs: [
-    { id: 'tab-app', fileId: 'app-tsx', name: 'App.tsx', path: '/src/App.tsx', language: 'typescript', isModified: false },
-  ],
-  activeTabId: 'tab-app',
+  tabs: [],
+  activeTabId: null,
   rightTabs: [],
   activeRightTabId: null,
   
@@ -285,22 +283,13 @@ export const useIDEStore = create<IDEState>()(persist((set, get) => ({
   
   chatMessages: [],
   chatLoading: false,
-  gitChanges: sampleGitChanges,
+  gitChanges: [],
   gitBranch: 'main',
-  problems: sampleProblems,
+  problems: [],
   searchQuery: '',
   searchResults: [],
   terminalHistory: [
-    '$ cd lumina-project',
-    '$ npm install',
-    'added 347 packages in 4.2s',
-    '$ npm run dev',
-    '',
-    '  VITE v5.4.19  ready in 312 ms',
-    '',
-    '  ➜  Local:   http://localhost:5173/',
-    '  ➜  Network: http://192.168.1.42:5173/',
-    '  ➜  press h + enter to show help',
+    '$ Welcome to Lumina IDE',
     '',
   ],
   
