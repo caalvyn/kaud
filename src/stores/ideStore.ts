@@ -401,46 +401,54 @@ export const useIDEStore = create<IDEState>()((set, get) => ({
     if (node) syncFileWrite(node.path, content);
   },
   
-  createFile: (parentId, name) => set((s) => {
-    const id = `file-${Date.now()}`;
-    const lang = getLanguageFromName(name);
-    if (parentId === 'root') {
-      const newFile: FileNode = { id, name, type: 'file', path: `/${name}`, language: lang, content: '' };
-      return { files: [...s.files, newFile] };
-    }
-    const addToParent = (nodes: FileNode[]): FileNode[] =>
-      nodes.map((n) => {
-        if (n.id === parentId && n.type === 'folder') {
-          const newFile: FileNode = { id, name, type: 'file', path: `${n.path}/${name}`, language: lang, content: '' };
-          return { ...n, children: [...(n.children || []), newFile] };
-        }
-        if (n.children) return { ...n, children: addToParent(n.children) };
-        return n;
-      });
-    const expanded = new Set(s.expandedFolders);
-    expanded.add(parentId);
-    return { files: addToParent(s.files), expandedFolders: expanded };
-  }),
+  createFile: (parentId, name) => {
+    set((s) => {
+      const id = `file-${Date.now()}`;
+      const lang = getLanguageFromName(name);
+      if (parentId === 'root') {
+        const newFile: FileNode = { id, name, type: 'file', path: `/${name}`, language: lang, content: '' };
+        syncFileWrite(newFile.path, '');
+        return { files: [...s.files, newFile] };
+      }
+      const addToParent = (nodes: FileNode[]): FileNode[] =>
+        nodes.map((n) => {
+          if (n.id === parentId && n.type === 'folder') {
+            const newFile: FileNode = { id, name, type: 'file', path: `${n.path}/${name}`, language: lang, content: '' };
+            syncFileWrite(newFile.path, '');
+            return { ...n, children: [...(n.children || []), newFile] };
+          }
+          if (n.children) return { ...n, children: addToParent(n.children) };
+          return n;
+        });
+      const expanded = new Set(s.expandedFolders);
+      expanded.add(parentId);
+      return { files: addToParent(s.files), expandedFolders: expanded };
+    });
+  },
   
-  createFolder: (parentId, name) => set((s) => {
-    const id = `folder-${Date.now()}`;
-    if (parentId === 'root') {
-      const newFolder: FileNode = { id, name, type: 'folder', path: `/${name}`, children: [] };
-      return { files: [...s.files, newFolder] };
-    }
-    const addToParent = (nodes: FileNode[]): FileNode[] =>
-      nodes.map((n) => {
-        if (n.id === parentId && n.type === 'folder') {
-          const newFolder: FileNode = { id, name, type: 'folder', path: `${n.path}/${name}`, children: [] };
-          return { ...n, children: [...(n.children || []), newFolder] };
-        }
-        if (n.children) return { ...n, children: addToParent(n.children) };
-        return n;
-      });
-    const expanded = new Set(s.expandedFolders);
-    expanded.add(parentId);
-    return { files: addToParent(s.files), expandedFolders: expanded };
-  }),
+  createFolder: (parentId, name) => {
+    set((s) => {
+      const id = `folder-${Date.now()}`;
+      if (parentId === 'root') {
+        const newFolder: FileNode = { id, name, type: 'folder', path: `/${name}`, children: [] };
+        syncFolderCreate(newFolder.path);
+        return { files: [...s.files, newFolder] };
+      }
+      const addToParent = (nodes: FileNode[]): FileNode[] =>
+        nodes.map((n) => {
+          if (n.id === parentId && n.type === 'folder') {
+            const newFolder: FileNode = { id, name, type: 'folder', path: `${n.path}/${name}`, children: [] };
+            syncFolderCreate(newFolder.path);
+            return { ...n, children: [...(n.children || []), newFolder] };
+          }
+          if (n.children) return { ...n, children: addToParent(n.children) };
+          return n;
+        });
+      const expanded = new Set(s.expandedFolders);
+      expanded.add(parentId);
+      return { files: addToParent(s.files), expandedFolders: expanded };
+    });
+  },
   
   deleteNode: (nodeId) => set((s) => {
     const removeNode = (nodes: FileNode[]): FileNode[] =>
