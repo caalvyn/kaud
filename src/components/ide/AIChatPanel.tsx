@@ -189,7 +189,7 @@ const AIChatPanel: React.FC = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask Lumina AI..."
+            placeholder="Ask KAUD AI..."
             rows={1}
             className="flex-1 bg-transparent border-none outline-none text-xs text-foreground placeholder:text-text-tertiary resize-none font-sans leading-5"
             style={{ minHeight: 20, maxHeight: 100 }}

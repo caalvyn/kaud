@@ -20,7 +20,7 @@ const settingsSections = [
     title: 'Appearance',
     icon: Palette,
     settings: [
-      { label: 'Color Theme', type: 'select', value: 'Lumina Dark', options: ['Lumina Dark', 'Lumina Light', 'Monokai', 'Solarized'] },
+      { label: 'Color Theme', type: 'select', value: 'KAUD Dark', options: ['KAUD Dark', 'KAUD Light', 'Monokai', 'Solarized'] },
       { label: 'Icon Theme', type: 'select', value: 'Material Icons', options: ['Material Icons', 'Seti', 'Default'] },
       { label: 'Sidebar Position', type: 'select', value: 'Left', options: ['Left', 'Right'] },
     ],

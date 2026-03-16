@@ -85,7 +85,7 @@ const MonacoEditor: React.FC = () => {
           <Sparkles size={28} className="text-text-tertiary" />
         </div>
         <div className="text-center">
-          <h2 className="text-lg font-semibold text-foreground mb-1">Lumina</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-1">KAUD</h2>
           <p className="text-xs text-text-tertiary mb-6">Modern AI-Powered Code Editor</p>
         </div>
         <div className="flex flex-col items-center gap-2 text-xs">

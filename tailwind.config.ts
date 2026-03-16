@@ -59,7 +59,7 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Lumina semantic colors
+        // KAUD semantic colors
         surface: {
           0: "hsl(var(--surface-0))",
           1: "hsl(var(--surface-1))",

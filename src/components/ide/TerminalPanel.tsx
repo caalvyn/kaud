@@ -24,7 +24,7 @@ const TerminalPanel: React.FC = () => {
     } else if (cmd === 'ls') {
       addTerminalLine('src/  node_modules/  package.json  tsconfig.json  README.md');
     } else if (cmd === 'pwd') {
-      addTerminalLine('/home/user/lumina-project');
+      addTerminalLine('/home/user/kaud-project');
     } else if (cmd.startsWith('echo ')) {
       addTerminalLine(input.slice(5));
     } else if (cmd === 'node -v') {
