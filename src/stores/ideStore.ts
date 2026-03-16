@@ -385,12 +385,14 @@ export const useIDEStore = create<IDEState>()(persist((set, get) => ({
   createFile: (parentId, name) => set((s) => {
     const id = `file-${Date.now()}`;
     const lang = getLanguageFromName(name);
+    if (parentId === 'root') {
+      const newFile: FileNode = { id, name, type: 'file', path: `/${name}`, language: lang, content: '' };
+      return { files: [...s.files, newFile] };
+    }
     const addToParent = (nodes: FileNode[]): FileNode[] =>
       nodes.map((n) => {
         if (n.id === parentId && n.type === 'folder') {
-          const newFile: FileNode = {
-            id, name, type: 'file', path: `${n.path}/${name}`, language: lang, content: '',
-          };
+          const newFile: FileNode = { id, name, type: 'file', path: `${n.path}/${name}`, language: lang, content: '' };
           return { ...n, children: [...(n.children || []), newFile] };
         }
         if (n.children) return { ...n, children: addToParent(n.children) };
@@ -403,12 +405,14 @@ export const useIDEStore = create<IDEState>()(persist((set, get) => ({
   
   createFolder: (parentId, name) => set((s) => {
     const id = `folder-${Date.now()}`;
+    if (parentId === 'root') {
+      const newFolder: FileNode = { id, name, type: 'folder', path: `/${name}`, children: [] };
+      return { files: [...s.files, newFolder] };
+    }
     const addToParent = (nodes: FileNode[]): FileNode[] =>
       nodes.map((n) => {
         if (n.id === parentId && n.type === 'folder') {
-          const newFolder: FileNode = {
-            id, name, type: 'folder', path: `${n.path}/${name}`, children: [],
-          };
+          const newFolder: FileNode = { id, name, type: 'folder', path: `${n.path}/${name}`, children: [] };
           return { ...n, children: [...(n.children || []), newFolder] };
         }
         if (n.children) return { ...n, children: addToParent(n.children) };
