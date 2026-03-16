@@ -33,6 +33,8 @@ const IDELayout: React.FC = () => {
 
   const SidebarContent = sidebarComponents[sidebarView] || FileExplorer;
 
+  useAutoSave();
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const mod = e.metaKey || e.ctrlKey;
