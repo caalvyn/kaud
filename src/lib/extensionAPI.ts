@@ -98,7 +98,7 @@ export class ExtensionHost {
       },
       getActiveFile: () => null, // To be connected to editor state
       openFile: (_path) => {
-        console.log(`[Lumina Extension API] openFile called with: ${_path}`);
+        console.log(`[KAUD Extension API] openFile called with: ${_path}`);
       },
       showNotification: (message, type = 'info') => {
         this.notifications.push({ message, type });
