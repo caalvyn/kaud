@@ -12,6 +12,8 @@ import MonacoEditor from '@/components/ide/MonacoEditor';
 import BottomPanel from '@/components/ide/BottomPanel';
 import StatusBar from '@/components/ide/StatusBar';
 import CommandPalette from '@/components/ide/CommandPalette';
+import RecoveryPrompt from '@/components/ide/RecoveryPrompt';
+import { useAutoSave } from '@/hooks/useAutoSave';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const sidebarComponents: Record<string, React.FC> = {
@@ -30,6 +32,8 @@ const IDELayout: React.FC = () => {
   } = useIDEStore();
 
   const SidebarContent = sidebarComponents[sidebarView] || FileExplorer;
+
+  useAutoSave();
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -109,6 +113,7 @@ const IDELayout: React.FC = () => {
       
       <StatusBar />
       <CommandPalette />
+      <RecoveryPrompt />
     </div>
   );
 };
