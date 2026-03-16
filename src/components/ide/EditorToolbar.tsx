@@ -13,7 +13,7 @@ const divider = 'divider' as const;
 
 type ToolbarItem = {
   id: string;
-  icon: React.FC<{ size?: number; strokeWidth?: number }>;
+  icon: React.ComponentType<any>;
   label: string;
   shortcut?: string;
 } | typeof divider;
