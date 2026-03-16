@@ -217,6 +217,7 @@ interface IDEState {
   createFolder: (parentId: string, name: string) => void;
   deleteNode: (nodeId: string) => void;
   renameNode: (nodeId: string, newName: string) => void;
+  moveNode: (nodeId: string, targetParentId: string) => void;
   setContextMenu: (menu: IDEState['contextMenu']) => void;
   setRenamingNodeId: (id: string | null) => void;
   
@@ -460,6 +461,56 @@ export const useIDEStore = create<IDEState>()((set, get) => ({
     return { files: rename(s.files), tabs, rightTabs, renamingNodeId: null };
   }),
   
+  moveNode: (nodeId, targetParentId) => set((s) => {
+    // Find and remove the node from its current location
+    let movedNode: FileNode | null = null;
+    const removeNode = (nodes: FileNode[]): FileNode[] =>
+      nodes.filter((n) => {
+        if (n.id === nodeId) { movedNode = { ...n }; return false; }
+        return true;
+      }).map((n) => n.children ? { ...n, children: removeNode(n.children) } : n);
+
+    let files = removeNode(s.files);
+    if (!movedNode) return {};
+
+    // Prevent moving a folder into itself or its descendants
+    const isDescendant = (node: FileNode, parentId: string): boolean => {
+      if (node.id === parentId) return true;
+      return node.children?.some((c) => isDescendant(c, parentId)) || false;
+    };
+    if ((movedNode as FileNode).type === 'folder' && isDescendant(movedNode as FileNode, targetParentId)) return {};
+
+    // Update path of moved node and its children
+    const updatePaths = (node: FileNode, parentPath: string): FileNode => {
+      const newPath = `${parentPath}/${node.name}`;
+      return {
+        ...node,
+        path: newPath,
+        children: node.children?.map((c) => updatePaths(c, newPath)),
+      };
+    };
+
+    if (targetParentId === 'root') {
+      const updated = updatePaths(movedNode as FileNode, '');
+      files = [...files, updated];
+    } else {
+      const addToParent = (nodes: FileNode[]): FileNode[] =>
+        nodes.map((n) => {
+          if (n.id === targetParentId && n.type === 'folder') {
+            const updated = updatePaths(movedNode as FileNode, n.path);
+            return { ...n, children: [...(n.children || []), updated] };
+          }
+          if (n.children) return { ...n, children: addToParent(n.children) };
+          return n;
+        });
+      files = addToParent(files);
+    }
+
+    const expanded = new Set(s.expandedFolders);
+    if (targetParentId !== 'root') expanded.add(targetParentId);
+    return { files, expandedFolders: expanded };
+  }),
+
   setContextMenu: (menu) => set({ contextMenu: menu }),
   setRenamingNodeId: (id) => set({ renamingNodeId: id }),
   

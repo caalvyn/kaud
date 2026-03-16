@@ -65,12 +65,13 @@ const TreeItem: React.FC<{ node: FileNode; depth: number }> = ({ node, depth }) 
   const {
     expandedFolders, toggleFolder, openFile, openFileInSplit, selectedFileId,
     contextMenu, setContextMenu, renamingNodeId, setRenamingNodeId,
-    renameNode, deleteNode, createFile, createFolder,
+    renameNode, deleteNode, createFile, createFolder, moveNode,
   } = useIDEStore();
   const isExpanded = expandedFolders.has(node.id);
   const isSelected = selectedFileId === node.id;
   const isRenaming = renamingNodeId === node.id;
   const [creating, setCreating] = useState<'file' | 'folder' | null>(null);
+  const [dragOver, setDragOver] = useState(false);
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -78,14 +79,48 @@ const TreeItem: React.FC<{ node: FileNode; depth: number }> = ({ node, depth }) 
     setContextMenu({ x: e.clientX, y: e.clientY, nodeId: node.id, nodeType: node.type });
   };
 
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData('text/plain', node.id);
+    e.dataTransfer.effectAllowed = 'move';
+    e.stopPropagation();
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    if (node.type !== 'folder') return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.stopPropagation();
+    setDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(false);
+    const draggedId = e.dataTransfer.getData('text/plain');
+    if (draggedId && draggedId !== node.id && node.type === 'folder') {
+      moveNode(draggedId, node.id);
+    }
+  };
+
   if (node.type === 'folder') {
     return (
       <>
         <button
-          className={`file-tree-item w-full ${isSelected ? 'selected' : ''}`}
+          className={`file-tree-item w-full ${isSelected ? 'selected' : ''} ${dragOver ? 'ring-1 ring-accent-blue bg-accent-blue/10' : ''}`}
           style={{ paddingLeft: depth * 12 + 8 }}
           onClick={() => toggleFolder(node.id)}
           onContextMenu={handleContextMenu}
+          draggable
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
         >
           {isExpanded
             ? <ChevronDown size={12} className="text-text-tertiary flex-shrink-0" />
@@ -104,7 +139,6 @@ const TreeItem: React.FC<{ node: FileNode; depth: number }> = ({ node, depth }) 
           ) : (
             <span className="truncate">{node.name}</span>
           )}
-          {/* Inline action buttons */}
           <div className="ml-auto flex items-center gap-0.5 opacity-0 group-hover:opacity-100">
             <button onClick={(e) => { e.stopPropagation(); setCreating('file'); if (!isExpanded) toggleFolder(node.id); }}
               className="p-0.5 hover:text-foreground text-text-tertiary" title="New File">
@@ -142,6 +176,8 @@ const TreeItem: React.FC<{ node: FileNode; depth: number }> = ({ node, depth }) 
       style={{ paddingLeft: depth * 12 + 20 }}
       onClick={() => openFile(node)}
       onContextMenu={handleContextMenu}
+      draggable
+      onDragStart={handleDragStart}
     >
       {getFileIcon(node.name)}
       {isRenaming ? (
@@ -217,8 +253,26 @@ const ContextMenu: React.FC = () => {
 };
 
 const FileExplorer: React.FC = () => {
-  const { files, createFile, createFolder } = useIDEStore();
+  const { files, createFile, createFolder, moveNode } = useIDEStore();
   const [creating, setCreating] = useState<'file' | 'folder' | null>(null);
+  const [rootDragOver, setRootDragOver] = useState(false);
+
+  const handleRootDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setRootDragOver(true);
+  };
+
+  const handleRootDragLeave = () => setRootDragOver(false);
+
+  const handleRootDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setRootDragOver(false);
+    const draggedId = e.dataTransfer.getData('text/plain');
+    if (draggedId) {
+      moveNode(draggedId, 'root');
+    }
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -254,7 +308,12 @@ const FileExplorer: React.FC = () => {
           />
         </div>
       )}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden py-1">
+      <div
+        className={`flex-1 overflow-y-auto overflow-x-hidden py-1 ${rootDragOver ? 'ring-1 ring-inset ring-accent-blue/50 bg-accent-blue/5' : ''}`}
+        onDragOver={handleRootDragOver}
+        onDragLeave={handleRootDragLeave}
+        onDrop={handleRootDrop}
+      >
         {files.length === 0 && !creating ? (
           <div className="flex flex-col items-center justify-center h-full px-6 text-center gap-4">
             <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'hsl(var(--surface-2))' }}>
