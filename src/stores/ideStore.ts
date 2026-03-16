@@ -237,6 +237,12 @@ interface IDEState {
   addTerminalLine: (line: string) => void;
   stageFile: (file: string) => void;
   unstageFile: (file: string) => void;
+
+  // Actions - Import/Export
+  importFiles: (files: FileNode[]) => void;
+  clearWorkspace: () => void;
+  hasUnsavedChanges: () => boolean;
+  markAllSaved: () => void;
 }
 
 export const useIDEStore = create<IDEState>()(persist((set, get) => ({
