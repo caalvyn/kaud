@@ -253,10 +253,36 @@ const ContextMenu: React.FC = () => {
   );
 };
 
+const collectAllNodes = (nodes: FileNode[]): Array<{ path: string; content: string; type: 'file' | 'folder' }> => {
+  const result: Array<{ path: string; content: string; type: 'file' | 'folder' }> = [];
+  for (const node of nodes) {
+    result.push({ path: node.path, content: node.content || '', type: node.type });
+    if (node.children) result.push(...collectAllNodes(node.children));
+  }
+  return result;
+};
+
 const FileExplorer: React.FC = () => {
   const { files, createFile, createFolder, moveNode } = useIDEStore();
   const [creating, setCreating] = useState<'file' | 'folder' | null>(null);
   const [rootDragOver, setRootDragOver] = useState(false);
+  const [linked, setLinked] = useState(isLinked());
+  const [linkedName, setLinkedName] = useState(getLinkedName());
+
+  useEffect(() => {
+    return onLinkChange((l, name) => {
+      setLinked(l);
+      setLinkedName(name ?? null);
+    });
+  }, []);
+
+  const handleLink = async () => {
+    const success = await linkFolder();
+    if (success && files.length > 0) {
+      const allNodes = collectAllNodes(files);
+      await syncAllFiles(allNodes);
+    }
+  };
 
   const handleRootDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -281,6 +307,13 @@ const FileExplorer: React.FC = () => {
         <span className="text-[10px] uppercase tracking-widest font-semibold text-text-tertiary">Explorer</span>
         <div className="flex items-center gap-1">
           <button
+            onClick={linked ? unlinkFolder : handleLink}
+            className={`p-1 transition-colors ${linked ? 'text-accent-green hover:text-accent-red' : 'text-text-tertiary hover:text-foreground'}`}
+            title={linked ? `Linked: ${linkedName} — Click to unlink` : 'Link to local folder'}
+          >
+            {linked ? <FolderSync size={13} /> : <Link size={13} />}
+          </button>
+          <button
             onClick={() => setCreating('file')}
             className="p-1 text-text-tertiary hover:text-foreground transition-colors"
             title="New File"
@@ -296,6 +329,22 @@ const FileExplorer: React.FC = () => {
           </button>
         </div>
       </div>
+      {linked && (
+        <div
+          className="mx-3 mb-1 px-2 py-1 rounded flex items-center gap-1.5 text-[10px] font-medium"
+          style={{ background: 'hsl(var(--accent-green) / 0.1)', color: 'hsl(var(--accent-green))' }}
+        >
+          <FolderSync size={10} />
+          <span className="truncate">Syncing to: {linkedName}</span>
+          <button
+            onClick={unlinkFolder}
+            className="ml-auto hover:text-accent-red transition-colors flex-shrink-0"
+            title="Unlink folder"
+          >
+            <Unlink size={10} />
+          </button>
+        </div>
+      )}
       {creating && (
         <div className="px-4 pb-1">
           <InlineInput
