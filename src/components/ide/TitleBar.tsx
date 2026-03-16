@@ -1,5 +1,5 @@
 import React from 'react';
-import { Minus, Square, X, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 const TitleBar: React.FC = () => {
   return (
@@ -24,17 +24,7 @@ const TitleBar: React.FC = () => {
         <span className="text-text-tertiary">workspace</span>
       </div>
 
-      <div className="flex items-center">
-        <button className="px-3 py-2 text-text-tertiary hover:text-foreground hover:bg-surface-2 transition-colors">
-          <Minus size={14} />
-        </button>
-        <button className="px-3 py-2 text-text-tertiary hover:text-foreground hover:bg-surface-2 transition-colors">
-          <Square size={12} />
-        </button>
-        <button className="px-3 py-2 text-text-tertiary hover:text-foreground hover:bg-accent-red transition-colors">
-          <X size={14} />
-        </button>
-      </div>
+      <div className="w-[68px]" />
     </div>
   );
 };
