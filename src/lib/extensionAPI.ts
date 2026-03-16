@@ -102,7 +102,7 @@ export class ExtensionHost {
       },
       showNotification: (message, type = 'info') => {
         this.notifications.push({ message, type });
-        console.log(`[Lumina Notification] [${type}] ${message}`);
+        console.log(`[KAUD Notification] [${type}] ${message}`);
       },
     };
   }
