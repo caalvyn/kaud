@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Download, FolderDown, Save, Check, Trash2 } from 'lucide-react';
+import JSZip from 'jszip';
 import { useIDEStore } from '@/stores/ideStore';
 import type { FileNode } from '@/types/ide';
 
