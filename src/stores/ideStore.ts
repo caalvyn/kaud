@@ -512,7 +512,7 @@ export const useIDEStore = create<IDEState>()(persist((set, get) => ({
     gitChanges: s.gitChanges.map((c) => c.file === file ? { ...c, staged: false } : c),
   })),
 }), {
-  name: 'lumina-ide-storage',
+  name: 'lumina-ide-storage-v2',
   storage: createJSONStorage(() => localStorage),
   partialize: (state) => ({
     files: state.files,
