@@ -2,7 +2,8 @@ import React, { useMemo } from 'react';
 import Editor from '@monaco-editor/react';
 import { useIDEStore } from '@/stores/ideStore';
 import type { FileNode } from '@/types/ide';
-import { FolderOpen, Sparkles } from 'lucide-react';
+import { FolderOpen, Sparkles, SplitSquareHorizontal } from 'lucide-react';
+import EditorTabs from './EditorTabs';
 
 const findFile = (nodes: FileNode[], id: string): FileNode | null => {
   for (const n of nodes) {
@@ -15,16 +16,69 @@ const findFile = (nodes: FileNode[], id: string): FileNode | null => {
   return null;
 };
 
+const langMap: Record<string, string> = {
+  typescript: 'typescript', javascript: 'javascript', css: 'css',
+  json: 'json', markdown: 'markdown', html: 'html', python: 'python',
+  rust: 'rust', go: 'go', dockerfile: 'dockerfile', svelte: 'svelte',
+};
+
+const EditorPane: React.FC<{
+  fileId: string | null;
+  files: FileNode[];
+  onChange: (fileId: string, content: string) => void;
+}> = ({ fileId, files, onChange }) => {
+  const file = useMemo(() => fileId ? findFile(files, fileId) : null, [fileId, files]);
+
+  if (!file) {
+    return (
+      <div className="flex items-center justify-center h-full text-text-tertiary text-xs" style={{ background: 'hsl(var(--editor-bg))' }}>
+        No file selected
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-full" style={{ background: 'hsl(var(--editor-bg))' }}>
+      <Editor
+        theme="vs-dark"
+        language={langMap[file.language || ''] || 'plaintext'}
+        value={file.content || ''}
+        onChange={(value) => onChange(file.id, value || '')}
+        options={{
+          fontSize: 13,
+          fontFamily: "var(--font-mono)",
+          fontLigatures: true,
+          lineHeight: 20,
+          minimap: { enabled: true, scale: 1 },
+          scrollBeyondLastLine: false,
+          smoothScrolling: true,
+          cursorBlinking: 'smooth',
+          cursorSmoothCaretAnimation: 'on',
+          renderLineHighlight: 'gutter',
+          padding: { top: 12, bottom: 12 },
+          bracketPairColorization: { enabled: true },
+          guides: { bracketPairs: true, indentation: true },
+          suggestOnTriggerCharacters: true,
+          quickSuggestions: true,
+          wordWrap: 'on',
+          automaticLayout: true,
+          tabSize: 2,
+        }}
+      />
+    </div>
+  );
+};
+
 const MonacoEditor: React.FC = () => {
-  const { tabs, activeTabId, files, updateFileContent } = useIDEStore();
+  const {
+    tabs, activeTabId, rightTabs, activeRightTabId,
+    files, updateFileContent, splitEditorOpen, toggleSplitEditor,
+    setActiveTab, closeTab, setActiveRightTab, closeRightTab,
+  } = useIDEStore();
   const activeTab = tabs.find((t) => t.id === activeTabId);
+  const activeRightTab = rightTabs.find((t) => t.id === activeRightTabId);
 
-  const activeFile = useMemo(() => {
-    if (!activeTab) return null;
-    return findFile(files, activeTab.fileId);
-  }, [activeTab, files]);
-
-  if (!activeTab || !activeFile) {
+  if (!activeTab) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-6" style={{ background: 'hsl(var(--editor-bg))' }}>
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center glass-surface">
@@ -54,44 +108,42 @@ const MonacoEditor: React.FC = () => {
     );
   }
 
-  const langMap: Record<string, string> = {
-    typescript: 'typescript',
-    javascript: 'javascript',
-    css: 'css',
-    json: 'json',
-    markdown: 'markdown',
-    html: 'html',
-    python: 'python',
-  };
-
   return (
-    <div className="h-full" style={{ background: 'hsl(var(--editor-bg))' }}>
-      <Editor
-        theme="vs-dark"
-        language={langMap[activeFile.language || ''] || 'plaintext'}
-        value={activeFile.content || ''}
-        onChange={(value) => updateFileContent(activeFile.id, value || '')}
-        options={{
-          fontSize: 13,
-          fontFamily: "var(--font-mono)",
-          fontLigatures: true,
-          lineHeight: 20,
-          minimap: { enabled: true, scale: 1 },
-          scrollBeyondLastLine: false,
-          smoothScrolling: true,
-          cursorBlinking: 'smooth',
-          cursorSmoothCaretAnimation: 'on',
-          renderLineHighlight: 'gutter',
-          padding: { top: 12, bottom: 12 },
-          bracketPairColorization: { enabled: true },
-          guides: { bracketPairs: true, indentation: true },
-          suggestOnTriggerCharacters: true,
-          quickSuggestions: true,
-          wordWrap: 'on',
-          automaticLayout: true,
-          tabSize: 2,
-        }}
-      />
+    <div className="flex flex-col h-full">
+      {/* Split toggle */}
+      <div className="flex items-center justify-between" style={{ background: 'hsl(var(--tab-inactive))' }}>
+        <div className="flex items-center flex-1 overflow-x-auto">
+          <EditorTabs tabs={tabs} activeTabId={activeTabId} onSelect={setActiveTab} onClose={closeTab} />
+        </div>
+        <button
+          onClick={toggleSplitEditor}
+          className={`px-2 py-1.5 text-text-tertiary hover:text-foreground transition-colors flex-shrink-0 ${splitEditorOpen ? 'text-accent-blue' : ''}`}
+          title="Split Editor"
+        >
+          <SplitSquareHorizontal size={14} />
+        </button>
+      </div>
+      
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left pane */}
+        <div className={`${splitEditorOpen ? 'w-1/2 border-r border-border' : 'w-full'} overflow-hidden`}>
+          <EditorPane fileId={activeTab?.fileId || null} files={files} onChange={updateFileContent} />
+        </div>
+
+        {/* Right pane */}
+        {splitEditorOpen && (
+          <div className="w-1/2 flex flex-col overflow-hidden">
+            {rightTabs.length > 0 && (
+              <div className="flex items-center overflow-x-auto" style={{ background: 'hsl(var(--tab-inactive))' }}>
+                <EditorTabs tabs={rightTabs} activeTabId={activeRightTabId} onSelect={setActiveRightTab} onClose={closeRightTab} />
+              </div>
+            )}
+            <div className="flex-1 overflow-hidden">
+              <EditorPane fileId={activeRightTab?.fileId || null} files={files} onChange={updateFileContent} />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

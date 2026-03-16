@@ -1,0 +1,4 @@
+project_id = "ebnogiuczscjbeznoafk"
+
+[functions.lumina-chat]
+verify_jwt = false
