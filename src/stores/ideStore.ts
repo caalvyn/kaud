@@ -450,21 +450,33 @@ export const useIDEStore = create<IDEState>()((set, get) => ({
     });
   },
   
-  deleteNode: (nodeId) => set((s) => {
-    const removeNode = (nodes: FileNode[]): FileNode[] =>
-      nodes.filter((n) => n.id !== nodeId).map((n) => {
-        if (n.children) return { ...n, children: removeNode(n.children) };
-        return n;
-      });
-    // Close any tabs for the deleted file
-    const tabs = s.tabs.filter((t) => t.fileId !== nodeId);
-    const rightTabs = s.rightTabs.filter((t) => t.fileId !== nodeId);
-    let activeTabId = s.activeTabId;
-    if (s.tabs.find((t) => t.id === activeTabId)?.fileId === nodeId) {
-      activeTabId = tabs.length > 0 ? tabs[tabs.length - 1].id : null;
-    }
-    return { files: removeNode(s.files), tabs, rightTabs, activeTabId };
-  }),
+  deleteNode: (nodeId) => {
+    // Find node before deleting to sync
+    const findNode = (nodes: FileNode[]): FileNode | null => {
+      for (const n of nodes) {
+        if (n.id === nodeId) return n;
+        if (n.children) { const f = findNode(n.children); if (f) return f; }
+      }
+      return null;
+    };
+    const node = findNode(get().files);
+    if (node) syncDelete(node.path, node.type === 'folder');
+
+    set((s) => {
+      const removeNode = (nodes: FileNode[]): FileNode[] =>
+        nodes.filter((n) => n.id !== nodeId).map((n) => {
+          if (n.children) return { ...n, children: removeNode(n.children) };
+          return n;
+        });
+      const tabs = s.tabs.filter((t) => t.fileId !== nodeId);
+      const rightTabs = s.rightTabs.filter((t) => t.fileId !== nodeId);
+      let activeTabId = s.activeTabId;
+      if (s.tabs.find((t) => t.id === activeTabId)?.fileId === nodeId) {
+        activeTabId = tabs.length > 0 ? tabs[tabs.length - 1].id : null;
+      }
+      return { files: removeNode(s.files), tabs, rightTabs, activeTabId };
+    });
+  },
   
   renameNode: (nodeId, newName) => set((s) => {
     const rename = (nodes: FileNode[]): FileNode[] =>
