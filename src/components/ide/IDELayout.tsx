@@ -113,6 +113,7 @@ const IDELayout: React.FC = () => {
       
       <StatusBar />
       <CommandPalette />
+      <RecoveryPrompt />
     </div>
   );
 };
