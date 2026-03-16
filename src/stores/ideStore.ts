@@ -377,17 +377,29 @@ export const useIDEStore = create<IDEState>()((set, get) => ({
     set({ activeRightTabId: tabId });
   },
   
-  updateFileContent: (fileId, content) => set((s) => {
-    const updateNode = (nodes: FileNode[]): FileNode[] =>
-      nodes.map((n) => {
-        if (n.id === fileId) return { ...n, content };
-        if (n.children) return { ...n, children: updateNode(n.children) };
-        return n;
-      });
-    const tabs = s.tabs.map((t) => t.fileId === fileId ? { ...t, isModified: true } : t);
-    const rightTabs = s.rightTabs.map((t) => t.fileId === fileId ? { ...t, isModified: true } : t);
-    return { files: updateNode(s.files), tabs, rightTabs };
-  }),
+  updateFileContent: (fileId, content) => {
+    set((s) => {
+      const updateNode = (nodes: FileNode[]): FileNode[] =>
+        nodes.map((n) => {
+          if (n.id === fileId) return { ...n, content };
+          if (n.children) return { ...n, children: updateNode(n.children) };
+          return n;
+        });
+      const tabs = s.tabs.map((t) => t.fileId === fileId ? { ...t, isModified: true } : t);
+      const rightTabs = s.rightTabs.map((t) => t.fileId === fileId ? { ...t, isModified: true } : t);
+      return { files: updateNode(s.files), tabs, rightTabs };
+    });
+    // Sync to linked folder
+    const findNode = (nodes: FileNode[]): FileNode | null => {
+      for (const n of nodes) {
+        if (n.id === fileId) return n;
+        if (n.children) { const f = findNode(n.children); if (f) return f; }
+      }
+      return null;
+    };
+    const node = findNode(get().files);
+    if (node) syncFileWrite(node.path, content);
+  },
   
   createFile: (parentId, name) => set((s) => {
     const id = `file-${Date.now()}`;
