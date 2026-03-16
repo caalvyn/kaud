@@ -217,6 +217,7 @@ interface IDEState {
   createFolder: (parentId: string, name: string) => void;
   deleteNode: (nodeId: string) => void;
   renameNode: (nodeId: string, newName: string) => void;
+  moveNode: (nodeId: string, targetParentId: string) => void;
   setContextMenu: (menu: IDEState['contextMenu']) => void;
   setRenamingNodeId: (id: string | null) => void;
   
