@@ -499,7 +499,7 @@ interface IDEState {
   unstageFile: (file: string) => void;
 }
 
-export const useIDEStore = create<IDEState>((set, get) => ({
+export const useIDEStore = create<IDEState>()(persist((set, get) => ({
   sidebarView: 'explorer',
   sidebarOpen: true,
   bottomPanelOpen: true,
