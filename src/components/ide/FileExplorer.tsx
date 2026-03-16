@@ -11,13 +11,33 @@ const getFileIcon = (name: string) => {
   const ext = name.split('.').pop()?.toLowerCase();
   const size = 14;
   const sw = 1.5;
+  // Color-coded icons matching VS Code style
   switch (ext) {
-    case 'tsx': case 'ts': return <FileCode size={size} strokeWidth={sw} className="text-accent-blue" />;
-    case 'jsx': case 'js': return <FileCode size={size} strokeWidth={sw} className="text-accent-yellow" />;
+    case 'ts': return <FileCode size={size} strokeWidth={sw} className="text-accent-blue" />;
+    case 'tsx': return <FileCode size={size} strokeWidth={sw} className="text-accent-blue" />;
+    case 'js': return <FileCode size={size} strokeWidth={sw} className="text-accent-yellow" />;
+    case 'jsx': return <FileCode size={size} strokeWidth={sw} className="text-accent-yellow" />;
+    case 'html': case 'htm': return <FileCode size={size} strokeWidth={sw} className="text-accent-orange" />;
     case 'css': return <FileType size={size} strokeWidth={sw} className="text-accent-purple" />;
+    case 'scss': case 'sass': case 'less': return <FileType size={size} strokeWidth={sw} className="text-accent-purple" />;
     case 'json': return <FileJson size={size} strokeWidth={sw} className="text-accent-orange" />;
-    case 'md': return <FileText size={size} strokeWidth={sw} className="text-text-secondary" />;
-    case 'png': case 'jpg': case 'svg': return <Image size={size} strokeWidth={sw} className="text-accent-green" />;
+    case 'md': case 'mdx': return <FileText size={size} strokeWidth={sw} className="text-text-secondary" />;
+    case 'txt': case 'log': return <FileText size={size} strokeWidth={sw} className="text-text-tertiary" />;
+    case 'png': case 'jpg': case 'jpeg': case 'gif': case 'svg': case 'webp': case 'ico':
+      return <Image size={size} strokeWidth={sw} className="text-accent-green" />;
+    case 'py': return <FileCode size={size} strokeWidth={sw} className="text-accent-blue" />;
+    case 'rb': return <FileCode size={size} strokeWidth={sw} className="text-accent-red" />;
+    case 'go': return <FileCode size={size} strokeWidth={sw} className="text-accent-blue" />;
+    case 'rs': return <FileCode size={size} strokeWidth={sw} className="text-accent-orange" />;
+    case 'java': case 'kt': return <FileCode size={size} strokeWidth={sw} className="text-accent-red" />;
+    case 'php': return <FileCode size={size} strokeWidth={sw} className="text-accent-purple" />;
+    case 'c': case 'cpp': case 'h': return <FileCode size={size} strokeWidth={sw} className="text-accent-blue" />;
+    case 'sh': case 'bash': case 'zsh': return <FileCode size={size} strokeWidth={sw} className="text-accent-green" />;
+    case 'yml': case 'yaml': case 'toml': return <FileJson size={size} strokeWidth={sw} className="text-accent-red" />;
+    case 'xml': return <FileCode size={size} strokeWidth={sw} className="text-accent-orange" />;
+    case 'sql': return <FileCode size={size} strokeWidth={sw} className="text-accent-blue" />;
+    case 'env': return <FileText size={size} strokeWidth={sw} className="text-accent-yellow" />;
+    case 'gitignore': case 'eslintrc': case 'prettierrc': return <FileText size={size} strokeWidth={sw} className="text-text-tertiary" />;
     default: return <File size={size} strokeWidth={sw} className="text-text-tertiary" />;
   }
 };
