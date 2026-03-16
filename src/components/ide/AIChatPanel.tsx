@@ -127,7 +127,7 @@ const AIChatPanel: React.FC = () => {
               <Sparkles size={20} className="text-accent-blue" />
             </div>
             <div className="text-center">
-              <p className="text-sm font-medium text-foreground">Lumina AI Assistant</p>
+               <p className="text-sm font-medium text-foreground">KAUD AI Assistant</p>
               <p className="text-[11px] text-text-tertiary mt-1">Powered by Gemini · Ask me anything about code</p>
             </div>
             <div className="flex flex-wrap gap-1.5 justify-center">
