@@ -135,7 +135,7 @@ export class ExtensionHost {
     }
 
     this.activeExtensions.add(manifest.id);
-    console.log(`[Lumina] Extension activated: ${manifest.name}`);
+    console.log(`[KAUD] Extension activated: ${manifest.name}`);
   }
 
   /**
