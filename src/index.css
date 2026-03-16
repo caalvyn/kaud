@@ -1,96 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
+    /* Lumina Dark Theme - Graphite/Slate with Liquid Glass */
+    --background: 220 14% 10%;
+    --foreground: 220 10% 88%;
+    
+    --card: 220 14% 13%;
+    --card-foreground: 220 10% 88%;
+    
+    --popover: 220 16% 12%;
+    --popover-foreground: 220 10% 88%;
+    
+    --primary: 215 70% 55%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 220 14% 18%;
+    --secondary-foreground: 220 10% 78%;
+    
+    --muted: 220 12% 16%;
+    --muted-foreground: 220 8% 52%;
+    
+    --accent: 215 60% 50%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 220 12% 18%;
+    --input: 220 12% 18%;
+    --ring: 215 70% 55%;
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Lumina Custom Tokens */
+    --glass-bg: 220 16% 12%;
+    --glass-border: 220 10% 22%;
+    --glass-highlight: 220 20% 28%;
+    --glass-shadow: 220 20% 4%;
+    
+    --surface-0: 220 14% 8%;
+    --surface-1: 220 14% 11%;
+    --surface-2: 220 14% 14%;
+    --surface-3: 220 14% 17%;
+    
+    --text-primary: 220 10% 90%;
+    --text-secondary: 220 8% 62%;
+    --text-tertiary: 220 8% 42%;
+    
+    --accent-blue: 215 70% 55%;
+    --accent-blue-dim: 215 50% 35%;
+    --accent-green: 145 55% 48%;
+    --accent-orange: 32 85% 56%;
+    --accent-red: 0 65% 55%;
+    --accent-purple: 265 55% 60%;
+    --accent-yellow: 45 80% 55%;
+    
+    --activity-bar: 220 14% 9%;
+    --sidebar-bg: 220 14% 11%;
+    --editor-bg: 220 14% 10%;
+    --panel-bg: 220 14% 11%;
+    --titlebar-bg: 220 14% 9%;
+    --statusbar-bg: 215 70% 40%;
+    
+    --tab-active: 220 14% 14%;
+    --tab-inactive: 220 14% 10%;
+    --tab-hover: 220 14% 12%;
+    --tab-border: 220 12% 18%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-background: 220 14% 11%;
+    --sidebar-foreground: 220 10% 78%;
+    --sidebar-primary: 215 70% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 220 14% 16%;
+    --sidebar-accent-foreground: 220 10% 88%;
+    --sidebar-border: 220 12% 18%;
+    --sidebar-ring: 215 70% 55%;
+
+    /* Typography */
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+    
+    /* Glass Effects */
+    --glass-blur: 20px;
+    --glass-opacity: 0.85;
   }
 }
 
@@ -98,8 +94,201 @@ All colors MUST be HSL.
   * {
     @apply border-border;
   }
-
+  
   body {
-    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    @apply bg-background text-foreground antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--glass-highlight));
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--text-tertiary));
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+@layer components {
+  /* Glass Panel */
+  .glass-panel {
+    background: hsl(var(--glass-bg) / var(--glass-opacity));
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid hsl(var(--glass-border));
+    box-shadow: 
+      0 0 0 0.5px hsl(var(--glass-highlight) / 0.3),
+      0 4px 24px -4px hsl(var(--glass-shadow) / 0.5);
+  }
+  
+  .glass-panel-subtle {
+    background: hsl(var(--surface-1) / 0.9);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--glass-border) / 0.5);
+  }
+  
+  .glass-surface {
+    background: hsl(var(--surface-2) / 0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid hsl(var(--glass-border) / 0.3);
+  }
+  
+  /* Liquid Glass Highlight */
+  .glass-highlight {
+    position: relative;
+  }
+  .glass-highlight::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--glass-highlight) / 0.15) 0%,
+      transparent 50%,
+      hsl(var(--glass-shadow) / 0.1) 100%
+    );
+    pointer-events: none;
+  }
+  
+  /* Activity Bar Item */
+  .activity-item {
+    @apply relative flex items-center justify-center w-12 h-12 cursor-pointer transition-all duration-200;
+    color: hsl(var(--text-tertiary));
+  }
+  .activity-item:hover {
+    color: hsl(var(--text-secondary));
+  }
+  .activity-item.active {
+    color: hsl(var(--text-primary));
+  }
+  .activity-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 25%;
+    bottom: 25%;
+    width: 2px;
+    background: hsl(var(--accent-blue));
+    border-radius: 0 2px 2px 0;
+  }
+  
+  /* Editor Tab */
+  .editor-tab {
+    @apply flex items-center gap-2 px-3 h-9 text-xs cursor-pointer transition-all duration-150 border-r;
+    background: hsl(var(--tab-inactive));
+    color: hsl(var(--text-secondary));
+    border-color: hsl(var(--tab-border));
+    font-family: var(--font-sans);
+  }
+  .editor-tab:hover {
+    background: hsl(var(--tab-hover));
+  }
+  .editor-tab.active {
+    background: hsl(var(--tab-active));
+    color: hsl(var(--text-primary));
+    border-bottom: 1px solid hsl(var(--accent-blue));
+  }
+  
+  /* File Tree */
+  .file-tree-item {
+    @apply flex items-center gap-1.5 px-2 py-1 text-xs cursor-pointer transition-colors duration-100 rounded-sm;
+    color: hsl(var(--text-secondary));
+    font-family: var(--font-sans);
+  }
+  .file-tree-item:hover {
+    background: hsl(var(--surface-2) / 0.5);
+    color: hsl(var(--text-primary));
+  }
+  .file-tree-item.selected {
+    background: hsl(var(--accent-blue) / 0.15);
+    color: hsl(var(--text-primary));
+  }
+  
+  /* Terminal */
+  .terminal-line {
+    font-family: var(--font-mono);
+    @apply text-xs leading-5;
+    color: hsl(var(--text-secondary));
+  }
+  .terminal-prompt {
+    color: hsl(var(--accent-green));
+  }
+  .terminal-path {
+    color: hsl(var(--accent-blue));
+  }
+  
+  /* Command Palette */
+  .command-palette {
+    @apply fixed inset-0 z-50 flex items-start justify-center;
+    padding-top: 15vh;
+  }
+  .command-palette-overlay {
+    @apply absolute inset-0;
+    background: hsl(var(--surface-0) / 0.6);
+    backdrop-filter: blur(4px);
+  }
+  .command-palette-content {
+    @apply relative w-full max-w-xl rounded-xl overflow-hidden;
+    background: hsl(var(--surface-1));
+    border: 1px solid hsl(var(--glass-border));
+    box-shadow: 0 24px 80px -12px hsl(var(--glass-shadow) / 0.8);
+  }
+
+  /* Status Bar */
+  .status-bar {
+    @apply flex items-center h-6 text-xs px-2;
+    background: hsl(var(--statusbar-bg));
+    color: hsl(0 0% 100% / 0.85);
+    font-family: var(--font-sans);
+    font-size: 11px;
+  }
+  
+  /* AI Chat */
+  .chat-message-user {
+    background: hsl(var(--accent-blue) / 0.12);
+    border: 1px solid hsl(var(--accent-blue) / 0.2);
+  }
+  .chat-message-assistant {
+    background: hsl(var(--surface-2) / 0.5);
+    border: 1px solid hsl(var(--glass-border) / 0.3);
+  }
+  
+  /* Extension Card */
+  .extension-card {
+    @apply rounded-lg p-3 cursor-pointer transition-all duration-200;
+    background: hsl(var(--surface-2) / 0.4);
+    border: 1px solid hsl(var(--glass-border) / 0.3);
+  }
+  .extension-card:hover {
+    background: hsl(var(--surface-2) / 0.7);
+    border-color: hsl(var(--glass-border));
+    box-shadow: 0 4px 16px -4px hsl(var(--glass-shadow) / 0.3);
+  }
+  
+  /* Breadcrumbs */
+  .breadcrumb-item {
+    @apply text-xs transition-colors;
+    color: hsl(var(--text-tertiary));
+    font-family: var(--font-sans);
+  }
+  .breadcrumb-item:hover {
+    color: hsl(var(--text-secondary));
+  }
+  .breadcrumb-separator {
+    color: hsl(var(--text-tertiary) / 0.5);
   }
 }
