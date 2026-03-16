@@ -117,7 +117,7 @@ export class ExtensionHost {
     if (manifest.contributes.commands) {
       for (const cmd of manifest.contributes.commands) {
         this.commands.register(cmd.id, cmd.title, () => {
-          console.log(`[Lumina] Executing command: ${cmd.title}`);
+          console.log(`[KAUD] Executing command: ${cmd.title}`);
         });
       }
     }
