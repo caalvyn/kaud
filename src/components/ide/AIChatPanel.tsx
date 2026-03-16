@@ -116,7 +116,7 @@ const AIChatPanel: React.FC = () => {
     <div className="flex flex-col h-full" style={{ background: 'hsl(var(--panel-bg))' }}>
       <div className="px-4 py-2.5 flex items-center gap-2 border-b border-border">
         <Sparkles size={14} className="text-accent-blue" />
-        <span className="text-xs font-semibold text-foreground">Lumina AI</span>
+        <span className="text-xs font-semibold text-foreground">KAUD AI</span>
         <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-accent-blue/20 text-accent-blue ml-auto">Streaming</span>
       </div>
 
