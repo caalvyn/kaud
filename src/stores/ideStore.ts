@@ -39,7 +39,7 @@ const sampleExtensions: Extension[] = [
     },
   },
   {
-    id: 'ext-copilot', name: 'AI Copilot', publisher: 'Lumina', description: 'AI-powered code completion and suggestions', version: '1.0.0',
+    id: 'ext-copilot', name: 'AI Copilot', publisher: 'KAUD', description: 'AI-powered code completion and suggestions', version: '1.0.0',
     installed: true, enabled: true, category: 'AI', downloads: 8200000, rating: 4.4,
     activationEvents: ['onStartup'],
     contributes: {
