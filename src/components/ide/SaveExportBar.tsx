@@ -1,5 +1,5 @@
-import React from 'react';
-import { Download, FolderOpen, Trash2 } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Download, FolderDown, Save, Check, Trash2 } from 'lucide-react';
 import { useIDEStore } from '@/stores/ideStore';
 import type { FileNode } from '@/types/ide';
 
@@ -43,39 +43,36 @@ const downloadFile = (filename: string, content: string) => {
   URL.revokeObjectURL(url);
 };
 
-const exportAsZip = async (files: FileNode[]) => {
-  // Simple manual ZIP is complex — export files individually in a folder structure via a combined text file
-  // For a proper ZIP, we'd need JSZip. Instead, let's export each file individually or a single concatenated bundle.
-  // We'll do individual file downloads for now, or a single JSON export.
-  const allFiles = collectFiles(files);
-  const exportData = JSON.stringify(allFiles, null, 2);
-  downloadFile('kaud-workspace.json', exportData);
+const findFileById = (nodes: FileNode[], id: string): FileNode | null => {
+  for (const n of nodes) {
+    if (n.id === id) return n;
+    if (n.children) { const f = findFileById(n.children, id); if (f) return f; }
+  }
+  return null;
 };
 
 const SaveExportBar: React.FC = () => {
-  const { files, tabs, rightTabs, markAllSaved, clearWorkspace } = useIDEStore();
+  const { files, tabs, rightTabs, markAllSaved, clearWorkspace, activeTabId } = useIDEStore();
   const hasModified = tabs.some(t => t.isModified) || rightTabs.some(t => t.isModified);
   const modifiedCount = [...tabs, ...rightTabs].filter(t => t.isModified).length;
+  const [showSaved, setShowSaved] = useState(false);
 
-  const handleExportAll = () => {
-    exportAsZip(files);
-    markAllSaved();
-  };
-
-  const handleExportCurrent = () => {
-    const activeTab = tabs.find(t => t.id === useIDEStore.getState().activeTabId);
+  const handleSaveCurrent = useCallback(() => {
+    const activeTab = tabs.find(t => t.id === activeTabId);
     if (!activeTab) return;
-    const findFile = (nodes: FileNode[], id: string): FileNode | null => {
-      for (const n of nodes) {
-        if (n.id === id) return n;
-        if (n.children) { const f = findFile(n.children, id); if (f) return f; }
-      }
-      return null;
-    };
-    const file = findFile(files, activeTab.fileId);
+    const file = findFileById(files, activeTab.fileId);
     if (file) {
       downloadFile(file.name, file.content || '');
+      setShowSaved(true);
     }
+  }, [tabs, activeTabId, files]);
+
+  const handleExportAll = () => {
+    const allFiles = collectFiles(files);
+    const exportData = JSON.stringify(allFiles, null, 2);
+    downloadFile('kaud-workspace.json', exportData);
+    markAllSaved();
+    setShowSaved(true);
   };
 
   const handleClearWorkspace = () => {
@@ -85,31 +82,70 @@ const SaveExportBar: React.FC = () => {
     clearWorkspace();
   };
 
+  // Ctrl+S shortcut
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        handleSaveCurrent();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [handleSaveCurrent]);
+
+  // Flash "Saved!" indicator
+  useEffect(() => {
+    if (showSaved) {
+      const timer = setTimeout(() => setShowSaved(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSaved]);
+
   return (
     <div className="flex items-center gap-1.5 px-2">
-      {hasModified && (
+      {/* Saved flash */}
+      {showSaved && (
+        <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full font-medium animate-fade-in"
+          style={{ background: 'hsl(var(--accent-green) / 0.15)', color: 'hsl(var(--accent-green))' }}>
+          <Check size={10} /> Saved
+        </span>
+      )}
+
+      {/* Unsaved indicator */}
+      {hasModified && !showSaved && (
         <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full font-medium"
           style={{ background: 'hsl(var(--accent-orange) / 0.15)', color: 'hsl(var(--accent-orange))' }}>
           {modifiedCount} unsaved
         </span>
       )}
+
+      {/* Save current file */}
       <button
-        onClick={handleExportCurrent}
-        className="p-1 text-text-tertiary hover:text-foreground transition-colors"
-        title="Download current file"
+        onClick={handleSaveCurrent}
+        className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors"
+        style={{ color: 'hsl(0 0% 100% / 0.85)' }}
+        title="Save current file (Ctrl+S)"
       >
-        <Download size={13} />
+        <Save size={12} />
+        <span className="hidden sm:inline">Save</span>
       </button>
+
+      {/* Export all */}
       <button
         onClick={handleExportAll}
-        className="p-1 text-text-tertiary hover:text-foreground transition-colors"
-        title="Export workspace as JSON"
+        className="p-1 transition-colors"
+        style={{ color: 'hsl(0 0% 100% / 0.65)' }}
+        title="Export all files"
       >
-        <FolderOpen size={13} />
+        <FolderDown size={13} />
       </button>
+
+      {/* Clear workspace */}
       <button
         onClick={handleClearWorkspace}
-        className="p-1 text-text-tertiary hover:text-accent-red transition-colors"
+        className="p-1 transition-colors hover:text-accent-red"
+        style={{ color: 'hsl(0 0% 100% / 0.45)' }}
         title="Clear workspace"
       >
         <Trash2 size={13} />
