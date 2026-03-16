@@ -29,7 +29,7 @@ serve(async (req) => {
           messages: [
             {
               role: "system",
-              content: `You are Lumina AI, a helpful coding assistant built into the Lumina code editor. You help developers understand, refactor, debug, and write code. 
+              content: `You are KAUD AI, a helpful coding assistant built into the KAUD code editor. You help developers understand, refactor, debug, and write code. 
 
 Keep responses concise and code-focused. When showing code, use markdown code blocks with the appropriate language. When explaining concepts, be clear and practical.
 
