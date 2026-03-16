@@ -67,8 +67,35 @@ const SaveExportBar: React.FC = () => {
     }
   }, [tabs, activeTabId, files]);
 
-  const handleExportAll = () => {
+  const handleExportAll = async () => {
     const allFiles = collectFiles(files);
+
+    // Try File System Access API to save into a real folder
+    if ('showDirectoryPicker' in window) {
+      try {
+        const dirHandle = await (window as any).showDirectoryPicker({ mode: 'readwrite' });
+        for (const file of allFiles) {
+          const parts = file.path.split('/');
+          let currentDir = dirHandle;
+          // Create subdirectories as needed
+          for (let i = 0; i < parts.length - 1; i++) {
+            currentDir = await currentDir.getDirectoryHandle(parts[i], { create: true });
+          }
+          const fileHandle = await currentDir.getFileHandle(parts[parts.length - 1], { create: true });
+          const writable = await fileHandle.createWritable();
+          await writable.write(file.content);
+          await writable.close();
+        }
+        markAllSaved();
+        setShowSaved(true);
+        return;
+      } catch (err: any) {
+        if (err.name === 'AbortError') return; // User cancelled
+        // Fall through to JSON download
+      }
+    }
+
+    // Fallback: download as single JSON bundle
     const exportData = JSON.stringify(allFiles, null, 2);
     downloadFile('kaud-workspace.json', exportData);
     markAllSaved();
